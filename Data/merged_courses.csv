@@ -1,0 +1,290 @@
+course_code,subject,number,name,description,credit_hours,course_level,is_lab,is_major_course,prerequisite_count,prerequisite_depth,graph_centrality,unlocks_count
+CS101,CS,101,Introduction to Programming,"Fundamentals of programming using Python. Covers variables, loops, functions, and basic data structures.",3,100,False,True,0,0,0.0,3
+CS102,CS,102,Data Structures and Algorithms,"Introduction to arrays, linked lists, stacks, queues, trees, and basic algorithms.",3,100,False,True,0,0,0.0,2
+CS103,CS,103,Object-Oriented Programming,"Principles of OOP: classes, inheritance, polymorphism, and encapsulation using Java.",3,100,False,True,0,0,0.0,2
+CS104,CS,104,Discrete Mathematics,"Mathematical foundations for computer science: logic, sets, relations, and proofs.",3,100,False,True,0,0,0.0,3
+CS105,CS,105,Computer Systems Fundamentals,"Introduction to computer architecture, operating systems, and system programming.",3,100,False,True,0,0,0.0,3
+CS106,CS,106,Programming Paradigms,"Functional programming, logic programming, and different programming paradigms.",3,100,False,True,0,0,0.0,1
+CS107,CS,107,Introduction to Algorithms,"Basic algorithmic thinking, problem-solving strategies, and algorithm analysis.",3,100,False,True,0,0,0.0,1
+CS108,CS,108,Computer Organization,"CPU architecture, memory hierarchy, and computer hardware fundamentals.",3,100,False,True,0,0,0.0,2
+CS201,CS,201,Advanced Data Structures,"Advanced data structures: hash tables, heaps, graphs, and their applications.",3,200,False,True,4,1,0.00029842560330365205,4
+CS202,CS,202,Algorithm Design and Analysis,"Algorithm design techniques: divide-and-conquer, dynamic programming, greedy algorithms.",3,200,False,True,3,1,3.629500580720093e-05,1
+CS203,CS,203,Database Systems,"Relational database design, SQL, normalization, and database management systems.",3,200,False,True,3,1,7.662279003742418e-05,1
+CS204,CS,204,Software Engineering,"Software development lifecycle, design patterns, testing, and project management.",3,200,False,True,3,1,0.0001350980771712479,2
+CS205,CS,205,Computer Networks,"Network protocols, TCP/IP, routing, and network security fundamentals.",3,200,False,True,2,1,6.855723319137952e-05,2
+CS206,CS,206,Web Development,"HTML, CSS, JavaScript, and modern web frameworks for building web applications.",3,200,False,True,2,1,1.61311136920893e-05,1
+CS207,CS,207,Operating Systems,"Process management, memory management, file systems, and concurrency.",3,200,False,True,3,1,0.0002560814298619176,3
+CS208,CS,208,Programming Languages,"Language design, syntax, semantics, and language implementation.",3,200,False,True,2,1,0.0,0
+CS209,CS,209,Human-Computer Interaction,"UI/UX design, usability testing, and user-centered design principles.",3,200,False,True,3,1,6.45244547683572e-05,1
+CS210,CS,210,Computer Graphics Basics,"2D graphics, rendering algorithms, and graphics programming fundamentals.",3,200,False,True,4,1,0.0001330816879597367,2
+CS211,CS,211,System Programming,"Low-level programming, system calls, and system-level software development.",3,200,False,True,4,1,0.00014921280165182605,1
+CS212,CS,212,Data Science Fundamentals,"Data analysis, visualization, and basic machine learning concepts.",3,200,False,True,3,1,0.00021777003484320557,4
+CS301,CS,301,Machine Learning,"Introduction to ML algorithms: supervised learning, neural networks, and model evaluation.",3,300,False,True,2,2,0.00010888501742160279,3
+CS302,CS,302,Computer Graphics,"3D graphics programming, rendering pipelines, and graphics APIs.",3,300,False,True,3,2,0.0002540650406504065,3
+CS303,CS,303,Distributed Systems,"Distributed computing, cloud computing, and distributed algorithms.",4,300,True,True,3,2,3.427861659568976e-05,1
+CS304,CS,304,Cybersecurity,"Network security, cryptography, ethical hacking, and security protocols.",3,300,False,True,4,2,7.863917924893535e-05,1
+CS305,CS,305,Artificial Intelligence,"AI fundamentals: search algorithms, knowledge representation, and expert systems.",4,300,True,True,3,2,0.00012299974190218093,2
+CS306,CS,306,Compiler Design,"Lexical analysis, parsing, code generation, and compiler optimization.",3,300,False,True,4,2,7.259001161440184e-05,1
+CS307,CS,307,Mobile App Development,"iOS and Android development, mobile UI/UX design, and app deployment.",3,300,False,True,3,2,0.00014921280165182602,2
+CS308,CS,308,Advanced Algorithms,"Complex algorithms, approximation algorithms, and advanced algorithm design.",3,300,False,True,3,2,5.242611949929024e-05,1
+CS309,CS,309,Parallel Computing,"Parallel algorithms, multi-threading, and parallel processing architectures.",4,300,True,True,4,2,0.00011493418505613628,2
+CS310,CS,310,Information Retrieval,"Search engines, text processing, and information retrieval systems.",3,300,False,True,2,2,0.00011291779584462512,3
+CS311,CS,311,Computer Vision,"Image processing, pattern recognition, and computer vision algorithms.",3,300,False,True,4,2,8.468834688346883e-05,1
+CS312,CS,312,Natural Language Processing,"Text analysis, language models, and NLP applications.",3,300,False,True,3,2,0.00010081946057555812,2
+CS313,CS,313,Game Development,"Game engines, game design, and interactive media development.",4,300,True,True,4,2,0.00014719641244031488,2
+CS314,CS,314,Software Testing,"Testing methodologies, test automation, and quality assurance.",4,300,True,True,2,2,9.073751451800232e-05,2
+CS401,CS,401,Advanced Machine Learning,"Deep learning, reinforcement learning, and advanced ML techniques.",3,400,False,True,3,3,0.0,0
+CS402,CS,402,Cloud Computing,"Cloud architectures, virtualization, containerization, and cloud services.",3,400,False,True,3,3,0.0,0
+CS403,CS,403,Big Data Analytics,"Hadoop, Spark, data mining, and large-scale data processing.",3,400,False,True,5,3,0.0,0
+CS404,CS,404,Software Architecture,"Enterprise software design, microservices, and architectural patterns.",4,400,True,True,4,3,0.0,0
+CS405,CS,405,Capstone Project,Senior design project integrating multiple CS concepts in a real-world application.,4,400,True,True,4,3,0.0,0
+CS406,CS,406,Blockchain Technology,"Blockchain fundamentals, cryptocurrencies, and distributed ledger systems.",3,400,False,True,5,3,0.0,0
+CS407,CS,407,Quantum Computing,"Quantum algorithms, quantum gates, and quantum computing applications.",3,400,False,True,5,3,0.0,0
+CS408,CS,408,Advanced Topics in AI,"Cutting-edge AI research, neural architectures, and AI applications.",3,400,False,True,5,3,0.0,0
+CS409,CS,409,High-Performance Computing,"Supercomputing, optimization, and high-performance systems.",3,400,False,True,4,3,0.0,0
+CS410,CS,410,Research Seminar,Current research topics and advanced studies in computer science.,4,400,True,True,3,3,0.0,0
+ECE101,ECE,101,Introduction to Electrical Engineering,"Basic circuit analysis, Ohm's law, Kirchhoff's laws, and DC circuits.",4,100,True,True,0,0,0.0,1
+ECE102,ECE,102,Digital Logic Design,"Boolean algebra, logic gates, combinational and sequential circuits.",3,100,False,True,0,0,0.0,4
+ECE103,ECE,103,Programming for Engineers,C/C++ programming for embedded systems and hardware control.,3,100,False,True,0,0,0.0,2
+ECE104,ECE,104,Circuit Analysis,"AC circuit analysis, phasors, impedance, and frequency response.",3,100,False,True,0,0,0.0,0
+ECE105,ECE,105,Engineering Mathematics,"Mathematical methods for engineering: differential equations, linear algebra.",4,100,True,True,0,0,0.0,5
+ECE106,ECE,106,Introduction to Electronics,"Basic electronic components, circuits, and measurements.",3,100,False,True,0,0,0.0,2
+ECE201,ECE,201,Electronics I,"Semiconductor devices, diodes, transistors, and amplifier circuits.",3,200,False,True,3,0,0.00012703252032520324,3
+ECE202,ECE,202,Signals and Systems,"Continuous and discrete-time signals, Fourier transforms, and system analysis.",3,200,False,True,3,0,0.00011493418505613628,2
+ECE203,ECE,203,Microcontrollers,"Microcontroller architecture, embedded programming, and interfacing.",4,200,True,True,4,1,9.073751451800232e-05,1
+ECE204,ECE,204,Electromagnetic Fields,"Electrostatics, magnetostatics, and electromagnetic wave propagation.",4,200,True,True,3,0,0.0001028358497870693,2
+ECE205,ECE,205,Digital Signal Processing,"Digital filters, FFT, and signal processing algorithms.",3,200,False,True,3,1,0.0,0
+ECE206,ECE,206,Electronics II,"Advanced amplifier circuits, feedback, and analog circuit design.",4,200,True,True,3,1,0.00014719641244031488,3
+ECE207,ECE,207,Power Electronics,"Power semiconductor devices, converters, and power systems.",4,200,True,True,4,1,6.049167634533488e-05,1
+ECE208,ECE,208,Communication Systems Fundamentals,Analog and digital communication basics.,4,200,True,True,3,1,0.00013106529874822557,3
+ECE209,ECE,209,Control Systems Basics,Introduction to feedback control and system stability.,3,200,False,True,3,0,0.0,0
+ECE301,ECE,301,Communication Systems,"Modulation, demodulation, and digital communication systems.",4,300,True,True,3,2,4.8393341076267905e-05,1
+ECE302,ECE,302,Control Systems,"Feedback control, stability analysis, and controller design.",4,300,True,True,3,2,0.00012703252032520324,3
+ECE303,ECE,303,VLSI Design,"Very Large Scale Integration, chip design, and semiconductor fabrication.",3,300,False,True,3,0,0.00013308168795973674,2
+ECE304,ECE,304,Power Systems,"Power generation, transmission, distribution, and grid management.",4,300,True,True,3,2,3.125403277842302e-05,1
+ECE305,ECE,305,Wireless Communications,"RF systems, antennas, and wireless network protocols.",3,300,False,True,4,2,0.00013106529874822557,2
+ECE306,ECE,306,Digital System Design,"FPGA design, hardware description languages, and digital systems.",3,300,False,True,2,0,6.654084397986837e-05,2
+ECE307,ECE,307,RF Circuit Design,"Radio frequency circuits, amplifiers, and RF system design.",3,300,False,True,3,2,0.0001673603045554265,3
+ECE308,ECE,308,Optical Communications,"Fiber optics, optical systems, and photonics.",4,300,True,True,2,0,2.117208672086721e-05,1
+ECE309,ECE,309,Embedded Systems,"Real-time systems, embedded programming, and hardware-software integration.",4,300,True,True,3,2,3.629500580720093e-05,1
+ECE310,ECE,310,Analog IC Design,Analog integrated circuit design and layout.,4,300,True,True,2,0,0.0,0
+ECE401,ECE,401,Advanced VLSI,"Advanced chip design, layout optimization, and testing methodologies.",4,400,True,True,4,3,0.0,0
+ECE402,ECE,402,Embedded Systems Design,"Real-time systems, hardware-software co-design, and optimization.",3,400,False,True,4,3,0.0,0
+ECE403,ECE,403,Senior Design Project,Capstone project in electrical or computer engineering.,4,400,True,True,5,3,0.0,0
+ECE404,ECE,404,Advanced Communication Systems,Advanced topics in wireless and optical communications.,4,400,True,True,4,3,0.0,0
+ECE405,ECE,405,Power Electronics Advanced,Advanced power conversion and energy systems.,4,400,True,True,4,3,0.0,0
+ECE406,ECE,406,Research Project,Independent research in electrical or computer engineering.,4,400,True,True,5,3,0.0,0
+MATH101,MATH,101,Calculus I,"Limits, derivatives, and applications of differentiation.",3,100,False,True,0,0,0.0,39
+MATH102,MATH,102,Calculus II,"Integration techniques, applications of integration, and infinite series.",3,100,False,True,0,0,0.0,34
+MATH103,MATH,103,Linear Algebra,"Vectors, matrices, systems of equations, and vector spaces.",3,100,False,True,0,0,0.0,20
+MATH104,MATH,104,Discrete Mathematics,"Logic, sets, functions, relations, and mathematical proofs.",3,100,False,True,0,0,0.0,12
+MATH105,MATH,105,Pre-Calculus,"Algebra, trigonometry, and preparation for calculus.",3,100,False,True,0,0,0.0,4
+MATH201,MATH,201,Calculus III,"Multivariable calculus, partial derivatives, and multiple integrals.",3,200,False,True,2,0,1.0081946057555813e-05,1
+MATH202,MATH,202,Differential Equations,"Ordinary differential equations, Laplace transforms, and applications.",3,200,False,True,3,0,8.509162472577106e-05,2
+MATH203,MATH,203,Probability and Statistics,"Probability theory, random variables, and statistical inference.",3,200,False,True,3,0,0.0,0
+MATH204,MATH,204,Abstract Algebra,"Groups, rings, fields, and algebraic structures.",3,200,False,True,2,0,4.8393341076267905e-05,2
+MATH205,MATH,205,Number Theory,"Prime numbers, modular arithmetic, and Diophantine equations.",3,200,False,True,3,0,4.0731062072525485e-05,1
+MATH206,MATH,206,Geometry,"Euclidean and non-Euclidean geometry, geometric proofs.",3,200,False,True,3,0,9.05358755968512e-05,3
+MATH207,MATH,207,Applied Statistics,Statistical methods for data analysis and decision-making.,3,200,False,True,3,0,7.601787327397082e-05,3
+MATH301,MATH,301,Real Analysis,"Rigorous treatment of limits, continuity, and differentiation.",4,300,True,True,3,0,0.0001288472706155633,3
+MATH302,MATH,302,Complex Analysis,"Complex functions, contour integration, and residue theory.",4,300,True,True,2,0,0.0,0
+MATH303,MATH,303,Topology,"Topological spaces, continuity, compactness, and connectedness.",4,300,True,True,2,0,1.2098335269066976e-05,1
+MATH304,MATH,304,Numerical Analysis,"Numerical methods for solving equations, interpolation, and integration.",3,300,False,True,3,0,3.629500580720093e-05,1
+MATH305,MATH,305,Mathematical Modeling,Modeling real-world problems using mathematical techniques.,3,300,False,True,3,0,6.19031487933927e-05,2
+MATH306,MATH,306,Graph Theory,"Graphs, networks, and combinatorial structures.",3,300,False,True,3,0,6.33146212414505e-05,2
+MATH307,MATH,307,Mathematical Logic,"Formal logic, set theory, and mathematical foundations.",3,300,False,True,3,0,3.629500580720093e-05,1
+MATH401,MATH,401,Advanced Analysis,"Measure theory, Lebesgue integration, and functional analysis.",3,400,False,True,3,0,0.0,0
+MATH402,MATH,402,Differential Geometry,"Manifolds, curves, surfaces, and geometric structures.",4,400,True,True,3,0,0.0,0
+MATH403,MATH,403,Mathematical Research Seminar,Advanced topics and research methods in mathematics.,3,400,False,True,4,0,0.0,0
+MATH404,MATH,404,Algebraic Geometry,"Algebraic varieties, schemes, and geometric algebra.",4,400,True,True,4,0,0.0,0
+PHYS101,PHYS,101,Mechanics,"Newtonian mechanics, kinematics, dynamics, and conservation laws.",4,100,True,True,0,0,0.0,22
+PHYS102,PHYS,102,Thermodynamics,"Heat, temperature, entropy, and the laws of thermodynamics.",4,100,True,True,0,0,0.0,12
+PHYS103,PHYS,103,Waves and Optics,"Wave motion, interference, diffraction, and optical systems.",4,100,True,True,0,0,0.0,4
+PHYS104,PHYS,104,Introduction to Physics,Fundamental physics concepts and scientific method.,3,100,False,True,0,0,0.0,1
+PHYS201,PHYS,201,Electromagnetism,"Electric and magnetic fields, Maxwell's equations, and electromagnetic waves.",4,200,True,True,3,0,4.8393341076267905e-05,1
+PHYS202,PHYS,202,Modern Physics,"Special relativity, quantum mechanics basics, and atomic physics.",4,200,True,True,3,0,3.931958962446767e-05,1
+PHYS203,PHYS,203,Quantum Mechanics I,"Wave functions, Schrödinger equation, and quantum states.",4,200,True,True,2,0,0.0,0
+PHYS204,PHYS,204,Statistical Mechanics,"Statistical distributions, entropy, and thermodynamic systems.",4,200,True,True,2,0,2.117208672086721e-05,1
+PHYS205,PHYS,205,Optics,"Geometric and wave optics, lasers, and optical systems.",3,200,False,True,3,0,0.00014518002322880372,3
+PHYS301,PHYS,301,Quantum Mechanics II,"Advanced quantum mechanics, operators, and quantum systems.",4,300,True,True,3,0,8.468834688346883e-05,2
+PHYS302,PHYS,302,Electrodynamics,Advanced electromagnetic theory and field equations.,3,300,False,True,4,0,4.8393341076267905e-05,1
+PHYS303,PHYS,303,Solid State Physics,"Crystal structures, band theory, and semiconductor physics.",4,300,True,True,3,0,2.7221254355400697e-05,1
+PHYS304,PHYS,304,Nuclear Physics,"Nuclear structure, radioactivity, and nuclear reactions.",4,300,True,True,3,0,9.376209833526907e-05,3
+PHYS305,PHYS,305,Astrophysics,"Stellar physics, cosmology, and astronomical phenomena.",3,300,False,True,3,0,4.8393341076267905e-05,1
+PHYS401,PHYS,401,Advanced Quantum Field Theory,Quantum field theory and particle physics.,3,400,False,True,3,0,0.0,0
+PHYS402,PHYS,402,Condensed Matter Physics,Advanced topics in solid state and condensed matter systems.,4,400,True,True,5,0,0.0,0
+PHYS403,PHYS,403,Advanced Laboratory,Advanced experimental physics and research methods.,3,400,False,True,5,0,0.0,0
+CHEM101,CHEM,101,General Chemistry I,"Atomic structure, chemical bonding, and stoichiometry.",4,100,True,True,0,0,0.0,19
+CHEM102,CHEM,102,General Chemistry II,"Thermodynamics, kinetics, and equilibrium.",3,100,False,True,0,0,0.0,6
+CHEM103,CHEM,103,Organic Chemistry I,"Structure, bonding, and reactions of organic compounds.",3,100,False,True,0,0,0.0,2
+CHEM201,CHEM,201,Organic Chemistry II,"Advanced organic reactions, mechanisms, and synthesis.",3,200,False,True,3,0,6.049167634533488e-05,1
+CHEM202,CHEM,202,Physical Chemistry,"Thermodynamics, quantum chemistry, and spectroscopy.",4,200,True,True,4,0,0.0,0
+CHEM203,CHEM,203,Analytical Chemistry,Chemical analysis techniques and instrumentation.,3,200,False,True,2,0,2.4196670538133953e-05,2
+CHEM204,CHEM,204,Biochemistry,"Biomolecules, enzymes, metabolism, and biochemical pathways.",3,200,False,True,3,0,8.468834688346883e-05,2
+CHEM301,CHEM,301,Inorganic Chemistry,"Coordination compounds, organometallics, and inorganic materials.",4,300,True,True,2,0,1.9155697509356045e-05,1
+CHEM302,CHEM,302,Advanced Organic Synthesis,Complex organic synthesis and retrosynthetic analysis.,4,300,True,True,3,0,2.8229448961156274e-05,1
+CHEM303,CHEM,303,Chemical Kinetics,"Reaction mechanisms, rate laws, and catalysis.",4,300,True,True,3,0,4.940153568202348e-05,1
+CHEM401,CHEM,401,Advanced Topics in Chemistry,Current research topics and advanced chemical principles.,4,400,True,True,5,0,0.0,0
+BIO101,BIO,101,General Biology I,"Cell biology, genetics, and molecular biology fundamentals.",4,100,True,True,0,0,0.0,3
+BIO102,BIO,102,General Biology II,"Evolution, ecology, and organismal biology.",3,100,False,True,0,0,0.0,3
+BIO103,BIO,103,Genetics,"Mendelian genetics, molecular genetics, and genetic analysis.",4,100,True,True,0,0,0.0,1
+BIO201,BIO,201,Cell Biology,"Cell structure, function, and cellular processes.",4,200,True,True,2,0,1.8147502903600465e-05,1
+BIO202,BIO,202,Molecular Biology,"DNA replication, transcription, translation, and gene regulation.",3,200,False,True,4,0,4.940153568202348e-05,1
+BIO203,BIO,203,Ecology,"Ecosystems, population dynamics, and environmental interactions.",3,200,False,True,3,0,6.855723319137952e-05,2
+BIO204,BIO,204,Microbiology,"Bacteria, viruses, and microbial systems.",3,200,False,True,3,0,4.536875725900116e-05,1
+BIO301,BIO,301,Biochemistry,"Metabolic pathways, enzyme kinetics, and biochemical systems.",4,300,True,True,3,0,4.637695186475674e-05,1
+BIO302,BIO,302,Developmental Biology,Embryonic development and developmental processes.,4,300,True,True,4,0,5.545070331655697e-05,1
+BIO303,BIO,303,Immunology,"Immune system, antibodies, and immune responses.",4,300,True,True,3,0,1.9155697509356045e-05,1
+BIO401,BIO,401,Advanced Molecular Biology,Current research in molecular biology and biotechnology.,4,400,True,True,5,0,0.0,0
+ENGR101,ENGR,101,Introduction to Engineering,"Engineering design process, ethics, and professional practice.",4,100,True,True,0,0,0.0,1
+ENGR102,ENGR,102,Engineering Graphics,"Technical drawing, CAD, and engineering visualization.",4,100,True,True,0,0,0.0,1
+ENGR103,ENGR,103,Engineering Mechanics,"Statics, dynamics, and mechanics of materials.",4,100,True,True,0,0,0.0,3
+ENGR201,ENGR,201,Thermodynamics,"Energy, heat transfer, and thermodynamic systems.",3,200,False,True,2,0,3.22622273841786e-05,2
+ENGR202,ENGR,202,Fluid Mechanics,"Fluid properties, flow analysis, and fluid systems.",3,200,False,True,2,0,0.0,0
+ENGR203,ENGR,203,Materials Science,"Material properties, structure, and material selection.",3,200,False,True,3,0,4.8393341076267905e-05,1
+ENGR204,ENGR,204,Engineering Design,"Design methodology, prototyping, and design optimization.",4,200,True,True,3,0,6.45244547683572e-05,1
+ENGR301,ENGR,301,Heat Transfer,"Conduction, convection, radiation, and heat exchangers.",4,300,True,True,2,0,1.0081946057555813e-05,1
+ENGR302,ENGR,302,Mechanical Design,"Machine design, stress analysis, and design optimization.",4,300,True,True,3,0,4.032778423022326e-05,1
+ENGR303,ENGR,303,Manufacturing Processes,"Manufacturing methods, quality control, and production systems.",4,300,True,True,4,0,4.6376951864756745e-05,1
+ENGR401,ENGR,401,Senior Design Project,Capstone engineering design project.,4,400,True,True,5,0,0.0,0
+STAT101,STAT,101,Introduction to Statistics,"Descriptive statistics, probability, and basic inference.",3,100,False,True,0,0,0.0,1
+STAT102,STAT,102,Probability Theory,"Probability distributions, random variables, and expectation.",3,100,False,True,0,0,0.0,3
+STAT201,STAT,201,Statistical Inference,"Hypothesis testing, confidence intervals, and estimation.",3,200,False,True,3,0,1.4518002322880372e-05,1
+STAT202,STAT,202,Regression Analysis,"Linear regression, multiple regression, and model diagnostics.",3,200,False,True,3,0,3.2665505226480836e-05,1
+STAT203,STAT,203,Experimental Design,"Design of experiments, ANOVA, and factorial designs.",3,200,False,True,3,0,7.379984514130856e-05,3
+STAT301,STAT,301,Bayesian Statistics,"Bayesian inference, prior distributions, and posterior analysis.",4,300,True,True,3,0,2.7019615434249583e-05,1
+STAT302,STAT,302,Time Series Analysis,"Time series models, forecasting, and trend analysis.",4,300,True,True,3,0,1.8550780745902696e-05,1
+STAT303,STAT,303,Multivariate Statistics,"Multivariate analysis, principal components, and factor analysis.",3,300,False,True,3,0,3.911795070331656e-05,1
+STAT401,STAT,401,Advanced Statistical Methods,Advanced topics in statistical theory and applications.,4,400,True,True,4,0,0.0,0
+ECON101,ECON,101,Principles of Microeconomics,"Supply and demand, market structures, and consumer behavior.",3,100,False,True,0,0,0.0,3
+ECON102,ECON,102,Principles of Macroeconomics,"GDP, inflation, unemployment, and monetary policy.",3,100,False,True,0,0,0.0,2
+ECON201,ECON,201,Intermediate Microeconomics,"Advanced consumer theory, production, and market equilibrium.",3,200,False,True,3,0,0.00010888501742160279,3
+ECON202,ECON,202,Intermediate Macroeconomics,"Economic growth, business cycles, and fiscal policy.",3,200,False,True,4,0,0.0,0
+ECON203,ECON,203,Econometrics,Statistical methods for economic data analysis.,3,200,False,True,4,0,0.0,0
+ECON301,ECON,301,International Economics,"International trade, exchange rates, and global markets.",4,300,True,True,2,0,1.4114724480578137e-05,1
+ECON302,ECON,302,Financial Economics,"Financial markets, asset pricing, and investment theory.",3,300,False,True,3,0,2.6213059749645113e-05,1
+ECON303,ECON,303,Labor Economics,"Labor markets, wages, and employment theory.",3,300,False,True,2,0,2.0163892115111625e-05,1
+ECON401,ECON,401,Advanced Economic Theory,Advanced topics in economic modeling and theory.,3,400,False,True,4,0,0.0,0
+PSYC101,PSYC,101,Introduction to Psychology,"Overview of psychological principles, research methods, and major theories.",3,100,False,True,0,0,0.0,2
+PSYC102,PSYC,102,Developmental Psychology,Human development across the lifespan.,3,100,False,True,0,0,0.0,3
+PSYC201,PSYC,201,Cognitive Psychology,"Memory, attention, perception, and cognitive processes.",3,200,False,True,4,0,4.032778423022325e-05,1
+PSYC202,PSYC,202,Social Psychology,"Social influence, group behavior, and interpersonal relationships.",3,200,False,True,4,0,2.8229448961156274e-05,1
+PSYC203,PSYC,203,Abnormal Psychology,"Psychological disorders, diagnosis, and treatment approaches.",3,200,False,True,3,0,2.8229448961156274e-05,1
+PSYC301,PSYC,301,Research Methods in Psychology,"Experimental design, data analysis, and research ethics.",4,300,True,True,3,0,2.8229448961156274e-05,1
+PSYC302,PSYC,302,Neuroscience,"Brain structure, neural pathways, and biological basis of behavior.",3,300,False,True,3,0,4.436056265324558e-05,1
+PSYC401,PSYC,401,Advanced Topics in Psychology,Current research and advanced psychological theories.,4,400,True,True,4,0,0.0,0
+BUS101,BUS,101,Introduction to Business,"Business fundamentals, organizational structures, and business ethics.",3,100,False,True,0,0,0.0,2
+BUS102,BUS,102,Financial Accounting,"Financial statements, accounting principles, and financial analysis.",3,100,False,True,0,0,0.0,2
+BUS201,BUS,201,Managerial Accounting,"Cost accounting, budgeting, and managerial decision-making.",3,200,False,True,2,0,3.831139501871209e-05,2
+BUS202,BUS,202,Marketing Principles,"Marketing strategy, consumer behavior, and market research.",3,200,False,True,3,0,4.032778423022325e-05,1
+BUS203,BUS,203,Operations Management,"Production systems, supply chain, and quality management.",3,200,False,True,3,0,3.024583817266744e-05,1
+BUS301,BUS,301,Strategic Management,"Corporate strategy, competitive analysis, and strategic planning.",4,300,True,True,4,0,4.436056265324558e-05,1
+BUS302,BUS,302,Finance,"Financial markets, investment analysis, and corporate finance.",3,300,False,True,4,0,5.2426119499290226e-05,1
+BUS401,BUS,401,Business Capstone,Integrative business project and strategic analysis.,3,400,False,True,3,0,0.0,0
+PHIL101,PHIL,101,Introduction to Philosophy,"Major philosophical questions, ethics, and logic.",3,100,False,True,0,0,0.0,1
+PHIL102,PHIL,102,Critical Thinking,"Logical reasoning, argument analysis, and fallacies.",3,100,False,True,0,0,0.0,2
+PHIL201,PHIL,201,Ethics,"Moral philosophy, ethical theories, and applied ethics.",3,200,False,True,3,0,7.259001161440186e-05,2
+PHIL202,PHIL,202,Logic,"Formal logic, propositional logic, and predicate logic.",3,200,False,True,2,0,0.0,0
+PHIL301,PHIL,301,Philosophy of Science,"Scientific method, theory, and philosophy of knowledge.",4,300,True,True,2,0,1.8147502903600465e-05,1
+PHIL302,PHIL,302,Metaphysics,"Reality, existence, and fundamental questions of being.",4,300,True,True,2,0,1.8147502903600465e-05,1
+PHIL401,PHIL,401,Advanced Philosophy Seminar,Advanced topics and research in philosophy.,3,400,False,True,3,0,0.0,0
+HIST101,HIST,101,World History I,Ancient civilizations through the Middle Ages.,3,100,False,True,0,0,0.0,14
+HIST102,HIST,102,World History II,Renaissance through modern era.,3,100,False,True,0,0,0.0,2
+HIST201,HIST,201,American History,United States history from colonial times to present.,3,200,False,True,3,0,3.629500580720093e-05,2
+HIST202,HIST,202,European History,European history and cultural developments.,3,200,False,True,3,0,3.629500580720093e-05,2
+HIST301,HIST,301,Historical Research Methods,"Historical methodology, sources, and historiography.",3,300,False,True,3,0,2.4196670538133953e-05,1
+HIST302,HIST,302,Special Topics in History,Focused study on specific historical periods or themes.,3,300,False,True,3,0,2.4196670538133953e-05,1
+HIST401,HIST,401,Senior Thesis,Independent research project in history.,3,400,False,True,3,0,0.0,0
+ENGL101,ENGL,101,Composition I,"Academic writing, research, and critical analysis.",3,100,False,True,0,0,0.0,9
+ENGL102,ENGL,102,Composition II,"Advanced writing, argumentation, and research methods.",3,100,False,True,0,0,0.0,1
+ENGL201,ENGL,201,British Literature,Survey of British literature from medieval to modern periods.,3,200,False,True,1,0,3.629500580720093e-05,2
+ENGL202,ENGL,202,American Literature,Survey of American literature and literary movements.,3,200,False,True,1,0,3.629500580720093e-05,2
+ENGL301,ENGL,301,Literary Theory,"Critical theory, literary analysis, and interpretation methods.",3,300,False,True,2,0,2.4196670538133953e-05,1
+ENGL302,ENGL,302,Creative Writing,"Fiction, poetry, and creative writing techniques.",3,300,False,True,2,0,2.4196670538133953e-05,1
+ENGL401,ENGL,401,Senior Seminar,Advanced literary study and research.,3,400,False,True,2,0,0.0,0
+ART101,ART,101,Drawing Fundamentals,"Basic drawing techniques, perspective, and composition.",3,100,False,True,0,0,0.0,0
+ART102,ART,102,Color Theory,"Color relationships, mixing, and color psychology.",3,100,False,True,0,0,0.0,1
+ART103,ART,103,2D Design,Principles of two-dimensional design and visual communication.,3,100,False,True,0,0,0.0,4
+ART104,ART,104,Art History Survey I,Art history from ancient times to the Renaissance.,3,100,False,True,0,0,0.0,4
+ART201,ART,201,Painting,"Painting techniques, materials, and artistic expression.",3,200,False,True,3,0,2.520486514388953e-05,1
+ART202,ART,202,Sculpture,"Three-dimensional art, materials, and sculptural techniques.",3,200,False,True,3,0,0.0,0
+ART203,ART,203,Printmaking,"Printmaking techniques including etching, lithography, and screen printing.",3,200,False,True,3,0,5.545070331655697e-05,2
+ART204,ART,204,Photography,"Digital and film photography, composition, and image editing.",3,200,False,True,2,0,1.512291908633372e-05,1
+ART205,ART,205,Art History Survey II,Art history from Renaissance to modern times.,3,200,False,True,3,0,3.7303200412956506e-05,1
+ART301,ART,301,Digital Art,"Digital media, graphic design, and digital art creation.",3,300,False,True,2,0,3.7303200412956506e-05,2
+ART302,ART,302,Advanced Painting,Advanced painting techniques and conceptual development.,4,300,True,True,3,0,6.855723319137952e-05,2
+ART303,ART,303,Contemporary Art,Contemporary art movements and critical analysis.,3,300,False,True,2,0,1.512291908633372e-05,1
+ART304,ART,304,Art Criticism,Critical analysis and interpretation of visual art.,3,300,False,True,2,0,1.2098335269066976e-05,1
+ART401,ART,401,Senior Portfolio,Advanced studio work and portfolio development.,4,400,True,True,4,0,0.0,0
+ART402,ART,402,Thesis Exhibition,Independent creative project and public exhibition.,4,400,True,True,4,0,0.0,0
+MED101,MED,101,Introduction to Human Biology,Overview of human body systems and basic physiology.,3,100,False,True,0,0,0.0,2
+MED102,MED,102,Medical Terminology,"Medical language, prefixes, suffixes, and anatomical terms.",3,100,False,True,0,0,0.0,2
+MED103,MED,103,Health and Wellness,"Principles of health, disease prevention, and wellness.",3,100,False,True,0,0,0.0,2
+MED201,MED,201,Human Anatomy,Detailed study of human body structure and organ systems.,3,200,False,True,4,0,0.0,0
+MED202,MED,202,Human Physiology,"Function of body systems, homeostasis, and physiological processes.",3,200,False,True,4,0,0.0,0
+MED203,MED,203,Medical Ethics,Ethical principles in healthcare and medical decision-making.,3,200,False,True,3,0,0.00013610627177700348,3
+MED204,MED,204,Pathophysiology,Disease processes and mechanisms of illness.,3,200,False,True,3,0,8.16637630662021e-05,1
+MED301,MED,301,Pharmacology,"Drug actions, mechanisms, and therapeutic applications.",3,300,False,True,3,0,0.0001290489095367144,2
+MED302,MED,302,Clinical Skills,"Patient assessment, physical examination, and diagnostic procedures.",3,300,False,True,2,0,2.318847593237837e-05,1
+MED303,MED,303,Medical Research Methods,"Research design, clinical trials, and evidence-based medicine.",3,300,False,True,2,0,5.34343141050458e-05,2
+MED401,MED,401,Advanced Clinical Practice,Advanced clinical skills and patient care.,3,400,False,True,4,0,0.0,0
+MED402,MED,402,Medical Capstone,Comprehensive medical knowledge integration and assessment.,3,400,False,True,5,0,0.0,0
+LAW101,LAW,101,Introduction to Law,"Overview of legal systems, courts, and legal principles.",3,100,False,True,0,0,0.0,0
+LAW102,LAW,102,Legal Research and Writing,"Legal research methods, case analysis, and legal writing.",3,100,False,True,0,0,0.0,4
+LAW103,LAW,103,Constitutional Law,"Constitutional principles, rights, and government structure.",3,100,False,True,0,0,0.0,1
+LAW201,LAW,201,Contracts,"Contract formation, enforcement, and breach of contract.",3,200,False,True,3,0,1.2098335269066976e-05,1
+LAW202,LAW,202,Torts,"Civil wrongs, negligence, liability, and damages.",3,200,False,True,4,0,7.460640082591301e-05,1
+LAW203,LAW,203,Criminal Law,"Criminal offenses, defenses, and criminal procedure.",3,200,False,True,2,0,0.0,0
+LAW204,LAW,204,Property Law,"Real property, personal property, and property rights.",3,200,False,True,3,0,9.477029294102464e-05,3
+LAW301,LAW,301,Civil Procedure,"Court procedures, jurisdiction, and litigation process.",3,300,False,True,3,0,0.00013308168795973674,3
+LAW302,LAW,302,Evidence,"Rules of evidence, admissibility, and trial evidence.",4,300,True,True,3,0,0.0,0
+LAW303,LAW,303,Business Law,"Corporate law, commercial transactions, and business entities.",4,300,True,True,3,0,3.024583817266744e-05,2
+LAW304,LAW,304,Family Law,"Marriage, divorce, custody, and family legal issues.",3,300,False,True,2,0,3.024583817266744e-05,2
+LAW401,LAW,401,Advanced Legal Writing,"Advanced legal briefs, motions, and appellate writing.",3,400,False,True,4,0,0.0,0
+LAW402,LAW,402,Legal Ethics,Professional responsibility and ethical obligations of lawyers.,3,400,False,True,4,0,0.0,0
+LAW403,LAW,403,Moot Court,Appellate advocacy and oral argument practice.,4,400,True,True,4,0,0.0,0
+MUS101,MUS,101,Music Theory I,"Fundamentals of music notation, scales, and basic harmony.",3,100,False,True,0,0,0.0,3
+MUS102,MUS,102,Ear Training I,"Aural skills, interval recognition, and sight-singing.",3,100,False,True,0,0,0.0,1
+MUS103,MUS,103,Music History Survey,Western music history from medieval to classical periods.,3,100,False,True,0,0,0.0,2
+MUS104,MUS,104,Introduction to Music Technology,"Digital audio, MIDI, and music production basics.",3,100,False,True,0,0,0.0,1
+MUS201,MUS,201,Music Theory II,"Advanced harmony, voice leading, and musical analysis.",3,200,False,True,3,0,7.259001161440186e-05,2
+MUS202,MUS,202,Ear Training II,Advanced aural skills and musical dictation.,3,200,False,True,3,0,7.138017808749516e-05,2
+MUS203,MUS,203,Orchestration,"Instrumentation, scoring, and arranging for ensembles.",3,200,False,True,2,0,1.4518002322880372e-05,1
+MUS204,MUS,204,Music History: Romantic to Modern,Music history from 19th century to present.,3,200,False,True,2,0,2.2986837011227255e-05,2
+MUS205,MUS,205,Composition,Musical composition techniques and creative expression.,3,200,False,True,2,0,0.0,0
+MUS301,MUS,301,Advanced Music Theory,"Complex harmony, form, and advanced analysis.",3,300,False,True,3,0,5.08130081300813e-05,1
+MUS302,MUS,302,Conducting,Conducting techniques and ensemble leadership.,4,300,True,True,3,0,4.718350754936121e-05,2
+MUS303,MUS,303,Jazz Theory and Improvisation,"Jazz harmony, improvisation, and jazz performance.",3,300,False,True,2,0,0.0,0
+MUS304,MUS,304,Music Production,"Recording, mixing, and music production techniques.",4,300,True,True,3,0,4.718350754936121e-05,2
+MUS401,MUS,401,Senior Recital,Public performance and recital preparation.,3,400,False,True,3,0,0.0,0
+MUS402,MUS,402,Music Composition Portfolio,Original compositions and creative portfolio.,4,400,True,True,4,0,0.0,0
+SOC101,SOC,101,Introduction to Sociology,"Basic sociological concepts, theories, and research methods.",3,100,False,True,0,0,0.0,3
+SOC102,SOC,102,Social Problems,Analysis of contemporary social issues and inequalities.,3,100,False,True,0,0,0.0,3
+SOC201,SOC,201,Social Theory,Classical and contemporary sociological theories.,3,200,False,True,3,0,0.0,0
+SOC202,SOC,202,Research Methods in Sociology,Quantitative and qualitative research methods.,3,200,False,True,3,0,3.831139501871209e-05,2
+SOC203,SOC,203,Social Stratification,"Class, race, gender, and social inequality.",3,200,False,True,3,0,3.831139501871209e-05,2
+SOC204,SOC,204,Urban Sociology,"Urban communities, cities, and social organization.",3,200,False,True,3,0,8.06555684604465e-05,2
+SOC301,SOC,301,Criminology,"Crime, deviance, and criminal justice systems.",3,300,False,True,4,0,3.629500580720093e-05,1
+SOC302,SOC,302,Family and Society,"Family structures, relationships, and social change.",4,300,True,True,3,0,3.22622273841786e-05,2
+SOC303,SOC,303,Race and Ethnicity,"Racial and ethnic relations, identity, and discrimination.",3,300,False,True,3,0,3.22622273841786e-05,2
+SOC304,SOC,304,Gender and Society,"Gender roles, feminism, and gender inequality.",3,300,False,True,3,0,3.22622273841786e-05,1
+SOC401,SOC,401,Advanced Sociological Research,Independent research project in sociology.,3,400,False,True,5,0,0.0,0
+SOC402,SOC,402,Social Policy Analysis,Analysis of social policies and their impacts.,3,400,False,True,4,0,0.0,0
+POL101,POL,101,Introduction to Political Science,"Overview of political systems, institutions, and behavior.",3,100,False,True,0,0,0.0,3
+POL102,POL,102,American Government,Structure and function of U.S. government and politics.,3,100,False,True,0,0,0.0,2
+POL103,POL,103,Comparative Politics,Comparison of different political systems and governments.,3,100,False,True,0,0,0.0,1
+POL201,POL,201,International Relations,"Global politics, diplomacy, and international organizations.",3,200,False,True,3,0,5.040973028777906e-05,2
+POL202,POL,202,Political Theory,Classical and modern political thought and philosophy.,3,200,False,True,4,0,7.662279003742418e-05,2
+POL203,POL,203,Public Policy,"Policy formation, implementation, and analysis.",3,200,False,True,3,0,7.863917924893533e-05,2
+POL204,POL,204,Political Research Methods,Quantitative and qualitative research in political science.,3,200,False,True,2,0,0.0,0
+POL301,POL,301,Constitutional Law,Constitutional interpretation and judicial review.,3,300,False,True,2,0,0.0,0
+POL302,POL,302,Public Administration,"Bureaucracy, public management, and governance.",4,300,True,True,4,0,4.1335978835978834e-05,1
+POL303,POL,303,Political Campaigns,"Elections, campaigns, and political communication.",3,300,False,True,3,0,4.3352368047489994e-05,2
+POL304,POL,304,International Security,"Security studies, conflict, and peace studies.",4,300,True,True,3,0,6.049167634533488e-05,2
+POL401,POL,401,Senior Thesis,Independent research project in political science.,4,400,True,True,5,0,0.0,0
+POL402,POL,402,Advanced Political Analysis,Advanced methods and analysis in political science.,4,400,True,True,4,0,0.0,0
+ENGL100,ENGL,100,English Composition,Basic writing skills and grammar.,3,100,False,False,0,0,0.0,104
+PHYS105,PHYS,105,General Physics I,"Mechanics, heat, and waves for non-majors.",4,100,True,False,0,0,0.0,3
+MATH106,MATH,106,Calculus for Business,Applied calculus for business and economics.,3,100,False,False,0,0,0.0,5
+STAT100,STAT,100,Introduction to Statistics,Basic statistics for non-majors.,3,100,False,False,0,0,0.0,19
+BIO105,BIO,105,General Biology for Non-Majors,Basic biology concepts for non-biology majors.,3,100,True,False,0,0,0.0,5

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Smart Academic Planning{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center g-3">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-6">
+        <div class="card shadow-lg border-0 mt-3 mt-md-4 fade-in">
+            <div class="card-header">
+                <div class="text-center">
+                    <i class="bi bi-person-plus-fill" style="font-size: 3rem;"></i>
+                    <h2 class="mt-3 mb-1">Create Account</h2>
+                    <p class="mb-0 opacity-75">Start planning your academic journey</p>
+                </div>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" name="username" placeholder="Choose a username" required autofocus>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" name="email" placeholder="your.email@example.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" name="password" placeholder="Create a password" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Major/Department</label>
+                        <select class="form-select" name="major" required id="majorSelect">
+                            <option value="">Loading majors...</option>
+                        </select>
+                        <small class="text-muted">You'll see courses primarily from your major</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Academic Strategy</label>
+                        <select class="form-select" name="strategy" required>
+                            <option value="easy">Easy - Prefer easier courses</option>
+                            <option value="balanced" selected>Balanced - Mix of difficulty</option>
+                            <option value="fast">Fast - Accelerate graduation</option>
+                        </select>
+                        <small class="text-muted">This affects course recommendations</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Workload Tolerance</label>
+                        <input type="range" class="form-range" name="workload_tolerance" min="0" max="1" step="0.1" value="0.5" id="workloadRange">
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Low (0)</small>
+                            <small class="text-muted">Value: <span id="workloadValue">0.5</span></small>
+                            <small class="text-muted">High (1)</small>
+                        </div>
+                        <small class="text-muted d-block mt-1">How much workload can you handle?</small>
+                    </div>
+
+                    <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
+                    <div id="registerSuccess" class="alert alert-success d-none" role="alert"></div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
+                        <i class="bi bi-person-plus"></i> Create Account
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted">Already have an account? 
+                        <a href="{{ url_for('login_page') }}" class="text-primary fw-bold">Login here</a>
+                    </p>
+                    <a href="{{ url_for('index') }}" class="text-muted">
+                        <i class="bi bi-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Load majors from API
+    $.ajax({
+        url: '/api/majors',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const select = $('#majorSelect');
+                select.empty();
+                select.append('<option value="ECE" selected>ECE - Electrical & Computer Engineering (Default)</option>');
+                response.majors.forEach(function(major) {
+                    if (major.code !== 'ECE') {
+                        select.append(`<option value="${major.code}">${major.display}</option>`);
+                    }
+                });
+            }
+        },
+        error: function() {
+            // Fallback to ECE
+            $('#majorSelect').html('<option value="ECE" selected>ECE - Electrical & Computer Engineering</option>');
+        }
+    });
+    
+    // Update workload value display
+    $('#workloadRange').on('input', function() {
+        $('#workloadValue').text($(this).val());
+    });
+    
+    $('#registerForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Hide previous messages
+        $('#registerError').addClass('d-none');
+        $('#registerSuccess').addClass('d-none');
+        
+        const formData = {
+            username: $('input[name="username"]').val(),
+            email: $('input[name="email"]').val(),
+            password: $('input[name="password"]').val(),
+            major: $('select[name="major"]').val(),
+            strategy: $('select[name="strategy"]').val(),
+            workload_tolerance: parseFloat($('input[name="workload_tolerance"]').val())
+        };
+        
+        // Show loading state
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Creating account...');
+        
+        $.ajax({
+            url: '/api/register',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                if (response.success) {
+                    $('#registerSuccess').removeClass('d-none').text('Account created successfully! Redirecting...');
+                    setTimeout(function() {
+                        window.location.href = response.redirect_to || '/dashboard';
+                    }, 1000);
+                } else {
+                    $('#registerError').removeClass('d-none').text(response.message || 'Registration failed. Please try again.');
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON?.message || 'Network error. Please try again.';
+                $('#registerError').removeClass('d-none').text(errorMsg);
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
