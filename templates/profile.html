@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Smart Academic Planning{% endblock %}
+
+{% block content %}
+<div class="row g-3 g-md-4">
+    <div class="col-12 col-lg-10 col-xl-8 mx-auto">
+        <div class="card dashboard-card fade-in">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="bi bi-person-circle me-2"></i> My Profile</h4>
+            </div>
+            <div class="card-body">
+                
+                <div class="row g-3 g-md-4 mb-4" id="profileDisplay">
+                    <div class="col-6 col-md-6">
+                        <div class="stat-card" style="background: var(--gradient-primary);">
+                            <h3 id="displayGPA">0.00</h3>
+                            <p>Current GPA</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-6">
+                        <div class="stat-card" style="background: var(--gradient-pink);">
+                            <h3 id="displaySemester">1</h3>
+                            <p>Current Semester</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                
+                <h5 class="mb-3"><i class="bi bi-pencil-square me-2"></i> Edit Profile Information</h5>
+                <form id="profileForm">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label"><i class="bi bi-mortarboard"></i> Major/Department</label>
+                            <select class="form-select" id="majorSelect" required>
+                                <option value="">Loading...</option>
+                            </select>
+                            <small class="text-muted">Your academic major or department</small>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label"><i class="bi bi-calendar3 me-1"></i> Current Semester</label>
+                            <input type="number" class="form-control" id="currentSemesterInput" min="1" max="20" value="1" required>
+                            <small class="text-muted">Which semester are you currently in? (e.g., 1 = First semester, 2 = Second semester)</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label"><i class="bi bi-graph-up"></i> Academic Strategy</label>
+                            <select class="form-select" id="strategySelect" required>
+                                <option value="easy">Easy - Prefer easier courses</option>
+                                <option value="balanced">Balanced - Mix of difficulty</option>
+                                <option value="fast">Fast - Complete requirements quickly</option>
+                            </select>
+                            <small class="text-muted">Your preferred course selection strategy</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-speedometer2"></i> Workload Tolerance</label>
+                            <input type="range" class="form-range" id="workloadRange" min="0" max="1" step="0.1" value="0.5">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Low (0.0)</small>
+                                <small class="text-muted"><strong>Current: <span id="workloadValue">0.5</span></strong></small>
+                                <small class="text-muted">High (1.0)</small>
+                            </div>
+                            <small class="text-muted d-block mt-1">Your ability to handle heavy course loads</small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> 
+                        <ul class="mb-0 mt-2">
+                            <li>Changes to your major will update course recommendations</li>
+                            <li>Changing your semester helps track your academic progress</li>
+                            <li>Your GPA is automatically calculated from completed courses</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/dashboard" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <button type="button" class="btn btn-primary" onclick="saveProfile()">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        
+        <div class="card dashboard-card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Account Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Username</strong></label>
+                        <p class="form-control-plaintext" id="displayUsername">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Email</strong></label>
+                        <p class="form-control-plaintext" id="displayEmail">-</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Account Created</strong></label>
+                        <p class="form-control-plaintext" id="displayCreated">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Last Updated</strong></label>
+                        <p class="form-control-plaintext" id="displayUpdated">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}
