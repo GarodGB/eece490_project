@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Smart Academic Planning{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center g-3">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-lg border-0 mt-3 mt-md-5 fade-in">
+            <div class="card-header">
+                <div class="text-center">
+                    <i class="bi bi-mortarboard-fill" style="font-size: 3rem;"></i>
+                    <h2 class="mt-3 mb-1">Welcome Back</h2>
+                    <p class="mb-0 opacity-75">Login to your account</p>
+                </div>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" name="username" placeholder="Enter your username" required autofocus>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" name="password" placeholder="Enter your password" required>
+                        </div>
+                    </div>
+
+                    <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted">Don't have an account? 
+                        <a href="{{ url_for('register_page') }}" class="text-primary fw-bold">Register here</a>
+                    </p>
+                    <a href="{{ url_for('index') }}" class="text-muted">
+                        <i class="bi bi-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('#loginForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Hide previous errors
+        $('#loginError').addClass('d-none');
+        
+        const formData = {
+            username: $('input[name="username"]').val(),
+            password: $('input[name="password"]').val()
+        };
+        
+        // Show loading state
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Logging in...');
+        
+        $.ajax({
+            url: '/api/login',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                if (response.success) {
+                    window.location.href = response.redirect_to || '/dashboard';
+                } else {
+                    $('#loginError').removeClass('d-none').text(response.message || 'Login failed. Please try again.');
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON?.message || 'Network error. Please try again.';
+                $('#loginError').removeClass('d-none').text(errorMsg);
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

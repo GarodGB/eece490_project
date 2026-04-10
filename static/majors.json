@@ -1,0 +1,102 @@
+[
+  {
+    "code": "ART",
+    "name": "Art",
+    "display": "ART - Art"
+  },
+  {
+    "code": "BIO",
+    "name": "Biology",
+    "display": "BIO - Biology"
+  },
+  {
+    "code": "BUS",
+    "name": "Business",
+    "display": "BUS - Business"
+  },
+  {
+    "code": "CHEM",
+    "name": "Chemistry",
+    "display": "CHEM - Chemistry"
+  },
+  {
+    "code": "CS",
+    "name": "Computer Science",
+    "display": "CS - Computer Science"
+  },
+  {
+    "code": "ECE",
+    "name": "Electrical & Computer Engineering",
+    "display": "ECE - Electrical & Computer Engineering"
+  },
+  {
+    "code": "ECON",
+    "name": "Economics",
+    "display": "ECON - Economics"
+  },
+  {
+    "code": "ENGL",
+    "name": "English",
+    "display": "ENGL - English"
+  },
+  {
+    "code": "ENGR",
+    "name": "Engineering",
+    "display": "ENGR - Engineering"
+  },
+  {
+    "code": "HIST",
+    "name": "History",
+    "display": "HIST - History"
+  },
+  {
+    "code": "LAW",
+    "name": "Law",
+    "display": "LAW - Law"
+  },
+  {
+    "code": "MATH",
+    "name": "Mathematics",
+    "display": "MATH - Mathematics"
+  },
+  {
+    "code": "MED",
+    "name": "Medicine/Pre-Med",
+    "display": "MED - Medicine/Pre-Med"
+  },
+  {
+    "code": "MUS",
+    "name": "Music",
+    "display": "MUS - Music"
+  },
+  {
+    "code": "PHIL",
+    "name": "Philosophy",
+    "display": "PHIL - Philosophy"
+  },
+  {
+    "code": "PHYS",
+    "name": "Physics",
+    "display": "PHYS - Physics"
+  },
+  {
+    "code": "POL",
+    "name": "Political Science",
+    "display": "POL - Political Science"
+  },
+  {
+    "code": "PSYC",
+    "name": "Psychology",
+    "display": "PSYC - Psychology"
+  },
+  {
+    "code": "SOC",
+    "name": "Sociology",
+    "display": "SOC - Sociology"
+  },
+  {
+    "code": "STAT",
+    "name": "Statistics",
+    "display": "STAT - Statistics"
+  }
+]
