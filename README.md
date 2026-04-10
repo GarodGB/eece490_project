@@ -194,11 +194,7 @@ See **`Documentaion And help/ML_MODELS.md`** for how each model maps to code pat
 - **Set another user as admin**:  
   `python scripts/set_admin.py <username>`
 
-## Git / coursework commits
 
-For a **3-week-style project timeline**, commit **several times per week** (small, logical changes)—not everything in one push. See **`PROJECT_GUIDE.md` → Section 2** for a day-by-day example plan.
-
-**Guided commit messages (course workflow):** **`Documentaion And help/GIT_COMMIT_PLAN.md`** (copy-paste blocks). Optional: add your own `git_project_commit.sh` that reads `scripts/git_commit_plan.pipe`.
 
 ## Notes
 
