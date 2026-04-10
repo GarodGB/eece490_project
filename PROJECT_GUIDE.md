@@ -1,8 +1,13 @@
 # Smart Academic Planning — Project Guide
 
+<<<<<<< HEAD
 This guide is for **EECE 490 / team use**: a **detailed project explanation**, **discussion & exam-style questions**, and a **3-week Git commit plan** (spread commits across the term — not one dump at the end).
 
 **Questions to ask your instructor (week by week)** → **`QUESTIONS_FOR_INSTRUCTOR.md`**.
+=======
+This guide is for **EECE 490 / team use**: a **detailed project explanation**, **discussion & exam-style questions**.
+
+>>>>>>> origin/main
 
 For a concise technical walkthrough of modules and APIs, see **`PROJECT_EXPLANATION.md`**.  
 **Where each ML model is used (Models 1–3)** → **`ML_MODELS.md`**.
@@ -67,6 +72,7 @@ python ml/train_all_models.py
 - **Admin users**: `scripts/seed_admin.py` / `scripts/set_admin.py` for elevated access; admins are restricted to admin UI and admin APIs.
 - **Passwords**: Stored as Werkzeug password hashes, not plaintext.
 
+<<<<<<< HEAD
 ### 1.6 What was cleaned up (unused / duplicate)
 
 - **`ml/backup/`** (removed earlier) — duplicate experimental trainers not wired to the running app.
@@ -239,3 +245,10 @@ python app.py
 ---
 
 *Last updated to match repo cleanup: unused ML trainers removed; commit cadence documented; supervisor check-in questions live in **`QUESTIONS_FOR_INSTRUCTOR.md`**.*
+=======
+
+
+
+
+---
+>>>>>>> origin/main
