@@ -54,6 +54,34 @@ function showAlert(message, type = 'info') {
     setTimeout(() => alertDiv.fadeOut(), 5000);
 }
 
+/**
+ * Centered Bootstrap modal for important messages (not the brief top-of-page alert).
+ * @param {string} title - Modal title
+ * @param {string} message - Plain text body (safe; set via textContent)
+ * @param {'info'|'warning'|'danger'|'success'} variant - Icon and header accent
+ */
+function showMessageBox(title, message, variant = 'info') {
+    const titleText = document.getElementById('appMessageModalTitleText');
+    const bodyEl = document.getElementById('appMessageModalBody');
+    const iconEl = document.getElementById('appMessageModalIcon');
+    const modalEl = document.getElementById('appMessageModal');
+    if (!titleText || !bodyEl || !modalEl) {
+        showAlert(message, variant === 'warning' ? 'warning' : variant === 'danger' ? 'danger' : 'info');
+        return;
+    }
+    titleText.textContent = title || 'Notice';
+    bodyEl.textContent = message || '';
+    const icons = {
+        warning: 'bi-exclamation-triangle-fill text-warning',
+        danger: 'bi-x-octagon-fill text-danger',
+        success: 'bi-check-circle-fill text-success',
+        info: 'bi-info-circle-fill text-primary'
+    };
+    iconEl.className = 'bi ' + (icons[variant] || icons.info);
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+}
+
 function formatDifficulty(score) {
     if (score < 0.33) return { text: 'Easy', class: 'difficulty-easy' };
     if (score < 0.67) return { text: 'Medium', class: 'difficulty-medium' };
@@ -69,6 +97,7 @@ const API = {
         $.ajax({
             url: url,
             method: 'GET',
+            cache: false,
             success: function(response) {
                 if (response.success !== false) {
                     callback(response);
