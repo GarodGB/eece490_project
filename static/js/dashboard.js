@@ -11,7 +11,7 @@ $(document).ready(function() {
     loadCompletedCourses();
     loadUnlockedCourses();
     loadAvailableCourses();
-    loadBottlenecks();
+    loadAcademicJourneySection();
     if ($('#performance').hasClass('active')) {
         loadPerformanceDashboard();
     }
@@ -71,19 +71,116 @@ $(document).ready(function() {
     $('button[data-bs-target="#prereqGraph"]').on('shown.bs.tab', function() {
         loadPrereqGraph();
     });
+
+    $('button[data-bs-target="#bottlenecks"]').on('shown.bs.tab', function() {
+        loadBottlenecks();
+    });
     
     $('button[data-bs-target="#performance"]').on('shown.bs.tab', function() {
         loadPerformanceDashboard();
+    });
+
+    $('button[data-bs-target="#recommendations"]').on('shown.bs.tab', function() {
+        loadRecommendationGoalsFromProfile();
+    });
+
+    $('#recWorkloadRange').on('input', function() {
+        const value = parseFloat($(this).val());
+        $('#recWorkloadValue').text(value.toFixed(1));
     });
 });
 
 let prereqGraphNetwork = null;
 
+/** Major vs gen-ed electives vs math/science support (matches server catalog_bucket). */
+function catalogBucket(course) {
+    if (!course) return 'elective';
+
+    const type = String(course.course_type || '').trim().toLowerCase();
+    const bucket = String(course.catalog_bucket || '').trim().toLowerCase();
+    const tag = String(course.catalog_tag || '').trim().toLowerCase();
+    const subject = String(course.subject || '').trim().toUpperCase();
+    const name = String(course.name || '').trim().toLowerCase();
+    const code = String(course.course_code || '').trim().toUpperCase();
+
+    // Manual correction: courses named "ECE Elective..." should appear as Elective,
+    // even if the old backend still marks them as major/core.
+    if (
+        name.includes('elective') ||
+        code.includes('ELECTIVE') ||
+        type === 'major_elective' ||
+        type === 'general_elective' ||
+        bucket === 'elective' ||
+        tag === 'elective'
+    ) {
+        return 'elective';
+    }
+
+    if (
+        type === 'support' ||
+        bucket === 'support' ||
+        tag === 'support' ||
+        ['MATH', 'PHYS', 'CHEM', 'STAT', 'ENGL', 'ENG'].includes(subject)
+    ) {
+        return 'support';
+    }
+
+    if (type === 'core' || bucket === 'major' || tag === 'major') {
+        return 'major';
+    }
+
+    return 'elective';
+}
+
+function catalogRoleItemClass(course) {
+    const k = catalogBucket(course);
+    if (k === 'elective') return 'course-item--elective';
+    if (k === 'support') return 'course-item--support';
+    return 'course-item--major';
+}
+
+function formatCatalogRoleBadge(course) {
+    const k = catalogBucket(course);
+    if (k === 'elective') {
+        return '<span class="role-badge role-badge--elective"><i class="bi bi-stars" aria-hidden="true"></i> Elective</span>';
+    }
+    if (k === 'support') {
+        return '<span class="role-badge role-badge--support"><i class="bi bi-calculator" aria-hidden="true"></i> Support</span>';
+    }
+    return '<span class="role-badge role-badge--major"><i class="bi bi-mortarboard-fill" aria-hidden="true"></i> Major</span>';
+}
+function catalogRoleItemClass(course) {
+    const k = catalogBucket(course);
+    if (k === 'elective') return 'course-item--elective';
+    if (k === 'support') return 'course-item--support';
+    return 'course-item--major';
+}
+
+function formatCatalogRoleBadge(course) {
+    const k = catalogBucket(course);
+    if (k === 'elective') {
+        return '<span class="role-badge role-badge--elective"><i class="bi bi-stars" aria-hidden="true"></i> Elective</span>';
+    }
+    if (k === 'support') {
+        return '<span class="role-badge role-badge--support"><i class="bi bi-calculator" aria-hidden="true"></i> Support</span>';
+    }
+    return '<span class="role-badge role-badge--major"><i class="bi bi-mortarboard-fill" aria-hidden="true"></i> Major</span>';
+}
+
+function labBadgeHtml(course) {
+    if (!course || !course.is_lab) return '';
+    return '<span class="badge badge-rec-lab rounded-pill ms-1"><i class="bi bi-flask" aria-hidden="true"></i> Lab</span>';
+}
+
 function loadPrereqGraph() {
     const container = document.getElementById('prereqGraphContainer');
     if (!container) return;
     container.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100"><div class="spinner-border text-primary" role="status"></div><span class="ms-2">Loading graph...</span></div>';
-    API.get('/api/prerequisite-graph', function(response) {
+    const planCodes = getPlanCourseCodes();
+    const q = planCodes.length
+        ? ('?plan_codes=' + encodeURIComponent(planCodes.join(',')))
+        : '';
+    API.get('/api/prerequisite-graph' + q, function(response) {
         if (!response.success || !response.graph) {
             container.innerHTML = '<p class="text-muted text-center py-5">No graph data available.</p>';
             return;
@@ -113,7 +210,20 @@ function loadPrereqGraph() {
 function getPlanCourseCodes() {
     if (selectedCourses && selectedCourses.length > 0) return selectedCourses.map(c => c.code).filter(Boolean);
     if (currentRecommendations && currentRecommendations.length > 0) return currentRecommendations.map(c => c.course_code).filter(Boolean);
-    return [];
+    // Fallback: read codes directly from the rendered planner table (handles the
+    // ML hybrid recommender path which doesn't populate the globals above).
+    const rows = document.querySelectorAll('#plannerTableBody tr');
+    const codes = [];
+    rows.forEach(function(row) {
+        const cell = row.cells && row.cells[0];
+        if (!cell) return;
+        const text = (cell.textContent || '').trim().toUpperCase();
+        // Skip empty-state rows like "No recommendations found..."
+        if (text && /^[A-Z]{2,5}\s*\d{2,4}[A-Z]?$/i.test(text.replace(/\s+/g, ''))) {
+            codes.push(text.replace(/\s+/g, ''));
+        }
+    });
+    return codes;
 }
 
 function runWhatIfGpa() {
@@ -178,11 +288,33 @@ function exportPlanPDF() {
     });
 }
 
+function syncRecommendationGoalsFields(profile) {
+    if (!$('#recCurrentGpaDisplay').length || !profile) {
+        return;
+    }
+    $('#recCurrentGpaDisplay').text(formatGPA(profile.gpa || 0));
+    const tol = profile.workload_tolerance != null ? profile.workload_tolerance : 0.5;
+    $('#recWorkloadRange').val(tol);
+    $('#recWorkloadValue').text(Number(tol).toFixed(1));
+    if (profile.target_semester_gpa != null && profile.target_semester_gpa !== undefined) {
+        $('#recTargetGpaInput').val(profile.target_semester_gpa);
+    } else {
+        $('#recTargetGpaInput').val('');
+    }
+}
+
+function loadRecommendationGoalsFromProfile() {
+    API.get('/api/student/profile', function(response) {
+        syncRecommendationGoalsFields(response.profile);
+    });
+}
+
 function loadProfile() {
     API.get('/api/student/profile', function(response) {
         const profile = response.profile;
         $('#gpaDisplay').text(formatGPA(profile.gpa || 0));
         $('#semesterDisplay').text(profile.current_semester || 1);
+        syncRecommendationGoalsFields(profile);
         
         const majorCode = profile.major || 'N/A';
         if (majorCode !== 'N/A') {
@@ -274,6 +406,7 @@ function loadCompletedCourses() {
                     `;
                 });
                 $('#completedCoursesList').html(html2);
+                loadAcademicJourneySection();
                 $('.course-rate-select').on('change', function() {
                     var code = $(this).data('code');
                     var rating = $(this).val();
@@ -288,10 +421,12 @@ function loadCompletedCourses() {
                     html += '<div class="course-item mb-2 p-2 border rounded" id="course-' + course.id + '"><div class="d-flex justify-content-between align-items-center"><div class="flex-grow-1"><strong>' + (course.course_code || 'N/A') + '</strong> - ' + (course.name || 'N/A') + '<br><small class="text-muted">Grade: <span id="grade-' + course.id + '">' + (course.grade || 'N/A') + '</span> (' + formatGPA(course.grade_points || 0) + ') | ' + (course.credit_hours || 0) + ' credits | Semester: <span id="semester-' + course.id + '">' + (course.semester_taken || 1) + '</span></small></div><div class="ms-3"><button class="btn btn-sm btn-outline-primary me-1" onclick="editCourse(' + course.id + ', \'' + (course.course_code || '').replace(/'/g, "\\'") + '\', \'' + (course.name || 'N/A').replace(/'/g, "\\'") + '\', \'' + (course.grade || 'A') + '\', ' + (course.semester_taken || 1) + ')" title="Edit"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteCourse(' + course.id + ', \'' + (course.course_code || '') + '\')" title="Delete"><i class="bi bi-trash"></i></button></div></div></div>';
                 });
                 $('#completedCoursesList').html(html);
+                loadAcademicJourneySection();
             });
             return;
         }
         $('#completedCoursesList').html(html);
+        loadAcademicJourneySection();
     }, function(error) {
         console.error('Error loading completed courses:', error);
         $('#completedCoursesList').html('<p class="text-danger">Error loading completed courses. Please refresh the page.</p>');
@@ -300,10 +435,10 @@ function loadCompletedCourses() {
 
 function loadUnlockedCourses() {
     $('#unlockedCoursesList').html('<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> <small class="d-block mt-2">Loading...</small></div>');
-    
+
     API.get('/api/courses/unlocked?limit=200', function(response) {
         const courses = response.courses || [];
-        
+
         let html = '';
         if (courses.length === 0) {
             html = '<p class="text-muted">No unlocked courses available for your major. Complete prerequisite courses first!</p>';
@@ -312,10 +447,9 @@ function loadUnlockedCourses() {
             courses.slice(0, 50).forEach(course => {
                 const courseCode = course.course_code || '';
                 if (!courseCode || courseCode === 'N/A') return;
-                
-                const isMajor = course.is_major_course !== false;
-                const badge = isMajor ? '<span class="badge bg-primary ms-2">Major</span>' : '<span class="badge bg-secondary ms-2">Prereq</span>';
-                const escapedCode = courseCode.replace(/'/g, "\\'");
+
+                    const badge = formatCatalogRoleBadge(course);
+                    const escapedCode = courseCode.replace(/'/g, "\\'");
                 html += `
                     <div class="course-item mb-2 p-2 border rounded">
                         <div class="d-flex justify-content-between align-items-center">
@@ -344,11 +478,56 @@ function loadRecommendations() {
     const targetCredits = parseInt($('#targetCredits').val()) || 15;
     const maxCourses = parseInt($('#maxCourses').val()) || 6;
     const term = $('#termSelect').val() || 'Fall';
-    
-    $('#recommendationsList').html('<div class="text-center"><div class="spinner-border" role="status"></div> <p class="mt-2">Loading recommendations...</p></div>');
+
+    const tol = parseFloat($('#recWorkloadRange').val());
+    const tgtRaw = $('#recTargetGpaInput').val();
+
+    if ($('#recWorkloadRange').length && (isNaN(tol) || tol < 0 || tol > 1)) {
+        showAlert('Set semester intensity (tolerance) between 0 and 1.', 'warning');
+        return;
+    }
+
+    const payload = {};
+    if ($('#recWorkloadRange').length) {
+        payload.workload_tolerance = tol;
+        if (tgtRaw !== '' && tgtRaw != null) {
+            const tg = parseFloat(tgtRaw);
+            if (!isNaN(tg) && tg >= 0 && tg <= 4) {
+                payload.target_semester_gpa = tg;
+            }
+        } else {
+            payload.target_semester_gpa = null;
+        }
+    }
+
+    $('#recommendationsList').html('<div class="text-center"><div class="spinner-border" role="status"></div> <p class="mt-2">Saving goals and loading recommendations...</p></div>');
     $('#plannerTableContainer').hide();
-    
-    API.get(`/api/recommendations?credits=${targetCredits}&max_courses=${maxCourses}&term=${term}`, function(response) {
+
+    const runFetch = function() {
+        let recoUrl = `/api/recommendations?credits=${targetCredits}&max_courses=${maxCourses}&term=${encodeURIComponent(term)}`;
+        if ($('#recWorkloadRange').length && !isNaN(tol)) {
+            recoUrl += `&tolerance=${encodeURIComponent(tol)}`;
+        }
+        if (tgtRaw !== '' && tgtRaw != null) {
+            const tg = parseFloat(tgtRaw);
+            if (!isNaN(tg) && tg >= 0 && tg <= 4) {
+                recoUrl += `&target_gpa=${encodeURIComponent(tg)}`;
+            }
+        }
+        if ($('#recIncludeElectives').length) {
+            recoUrl += `&include_electives=${$('#recIncludeElectives').is(':checked') ? '1' : '0'}`;
+        }
+        if ($('#recElectiveEmphasis').length) {
+            recoUrl += `&elective_emphasis=${encodeURIComponent($('#recElectiveEmphasis').val() || 'balanced')}`;
+        }
+        if ($('#recMaxHardCourses').length) {
+            const mh = $('#recMaxHardCourses').val();
+            if (mh !== '' && mh != null) {
+                recoUrl += `&max_hard=${encodeURIComponent(mh)}`;
+            }
+        }
+        recoUrl += `&_=${Date.now()}`;
+        API.get(recoUrl, function(response) {
         const recommendations = response.recommendations || [];
         const term = response.term || 'Fall';
         
@@ -366,12 +545,12 @@ function loadRecommendations() {
                 if (creditHours <= 0) return;
                 totalCredits += creditHours;
                 
-                const isLab = course.is_lab ? '<span class="badge bg-warning">Lab</span>' : '';
-                const isMajor = course.is_major_course !== false ? '<span class="badge bg-primary">Major</span>' : '';
+                const labB = labBadgeHtml(course);
+                const roleBadge = formatCatalogRoleBadge(course);
                 
                 tableHtml += `
                     <tr>
-                        <td><strong>${course.course_code || 'N/A'}</strong> ${isMajor} ${isLab}</td>
+                        <td><strong>${course.course_code || 'N/A'}</strong>${labB}</td>
                         <td>${course.name || 'N/A'}</td>
                         <td>${creditHours}</td>
                         <td>
@@ -379,7 +558,7 @@ function loadRecommendations() {
                             <small class="text-muted">(${diffPercent}%)</small>
                         </td>
                         <td>${course.course_level || 100}</td>
-                        <td>${course.subject || 'N/A'}</td>
+                        <td>${roleBadge}<br><small class="text-muted">${course.subject || ''}</small></td>
                     </tr>
                 `;
             });
@@ -406,9 +585,61 @@ function loadRecommendations() {
                     </small>
                 </div>
             `;
+            if (response.planning_params) {
+                const p = response.planning_params;
+                if (p.credit_warning) {
+                    html += `<div class="alert alert-warning small mb-0 mt-2"><i class="bi bi-exclamation-triangle"></i> ${p.credit_warning}</div>`;
+                }
+            }
+            if (response.alternatives && response.alternatives.length > 0) {
+                html += '<div class="mt-3"><h6 class="text-muted small text-uppercase">Also consider (alternates)</h6><ul class="small mb-0">';
+                response.alternatives.forEach(function(alt) {
+                    const pct = alt.difficulty_score != null ? (Number(alt.difficulty_score) * 100).toFixed(0) : '—';
+                    html += `<li><strong>${alt.course_code || ''}</strong> — ${alt.name || ''}</li>`;
+                });
+                html += '</ul></div>';
+            }
         } else {
-            html = `<div class="alert alert-success mb-3"><i class="bi bi-check-circle"></i> <strong>${recommendations.filter(c => parseFloat(c.credit_hours || 0) > 0).length} courses recommended for ${term} semester</strong></div>`;
-            
+            html = `<div class="alert alert-success mb-3 border-0 shadow-sm"><i class="bi bi-check-circle-fill"></i> <strong>${recommendations.filter(c => parseFloat(c.credit_hours || 0) > 0).length} courses recommended for ${term} semester</strong></div>`;
+            if (response.planning_params) {
+                const p = response.planning_params;
+                const tol = p.workload_tolerance != null ? Number(p.workload_tolerance).toFixed(1) : '—';
+                const slack = p.credit_slack != null ? p.credit_slack : '—';
+                const maxCr = p.effective_max_credits != null ? Number(p.effective_max_credits).toFixed(0) : '—';
+                const mh = p.max_hard_courses != null ? p.max_hard_courses : '—';
+                const emc = p.effective_max_courses != null ? p.effective_max_courses : '—';
+                const tg = p.target_semester_gpa != null ? ` · Target GPA: ${Number(p.target_semester_gpa).toFixed(2)}` : '';
+                const cg = p.current_gpa != null ? ` · GPA now: ${Number(p.current_gpa).toFixed(2)}` : '';
+                const gm = p.goal_mode ? ` · Plan mode: ${String(p.goal_mode).replace(/_/g, ' ')}` : '';
+                const ew = p.easy_preference_weight != null ? ` · Safety weight: ${Number(p.easy_preference_weight).toFixed(2)}` : '';
+                const ts = p.total_credits_scheduled != null ? ` · Scheduled: ${Number(p.total_credits_scheduled).toFixed(1)} cr (cap ${maxCr})` : '';
+                const ecap = p.elective_credit_cap != null && p.elective_credits_in_plan != null
+                    ? ` · Elective-pool credits: ${Number(p.elective_credits_in_plan).toFixed(1)} / ${Number(p.elective_credit_cap).toFixed(0)} cap`
+                    : '';
+                const incEl = p.include_electives === false ? ' · electives off' : '';
+                const emLb = p.elective_emphasis ? ` · mix: ${String(p.elective_emphasis).replace(/_/g, ' ')}` : '';
+                const mhSrc = p.max_hard_source === 'override' ? ' (you set)' : '';
+                const wm = p.workload_model ? `<span class="d-block mt-1 text-muted">${p.workload_model}</span>` : '';
+                html += `<div class="alert rec-alert-soft small mb-3"><strong class="text-body">Plan summary:</strong> intensity ${tol}${cg}${tg}${gm} · up to ${emc} courses · credit cap ${maxCr}${ts} · flex index ${slack} · max Hard: ${mh}${mhSrc}${ew}${ecap}${incEl}${emLb}${wm}</div>`;
+                if (p.credit_warning) {
+                    html += `<div class="alert alert-warning small mb-3"><i class="bi bi-exclamation-triangle"></i> ${p.credit_warning}</div>`;
+                }
+            }
+            if (response.alternatives && response.alternatives.length > 0) {
+                html += '<div class="mb-3"><h6 class="text-muted small text-uppercase">Also consider (alternates)</h6><ul class="small mb-0">';
+                response.alternatives.forEach(function(alt) {
+                    const pct = alt.difficulty_score != null ? (Number(alt.difficulty_score) * 100).toFixed(0) : '—';
+                    const b = alt.catalog_bucket ? ` · ${alt.catalog_bucket}` : '';
+                    html += `<li><strong>${alt.course_code || ''}</strong> — ${alt.name || ''} (${alt.credit_hours || 0} cr, ~${pct}% diff${b})</li>`;
+                });
+                html += '</ul></div>';
+            }
+            if (response.semester_workload) {
+                const w = response.semester_workload;
+                const sd = w.semester_difficulty != null ? Number(w.semester_difficulty).toFixed(2) : '—';
+                const or = w.overload_risk != null ? Number(w.overload_risk).toFixed(2) : '—';
+                html += `<div class="alert rec-alert-soft small mb-3"><strong class="text-body">ML semester workload:</strong> difficulty ${sd} · overload risk ${or}</div>`;
+            }
             recommendations.forEach(course => {
                 const difficulty = course.difficulty_score || 0.5;
                 const diff = formatDifficulty(difficulty);
@@ -417,23 +648,21 @@ function loadRecommendations() {
                 
                 if (creditHours <= 0) return;
                 
-                const isLab = course.is_lab ? '<span class="badge bg-warning ms-1">Lab</span>' : '';
-                const isMajor = course.is_major_course !== false ? '<span class="badge bg-primary ms-1">Major</span>' : '';
+                const labB = labBadgeHtml(course);
+                const roleB = formatCatalogRoleBadge(course);
+                const roleRowClass = catalogRoleItemClass(course);
                 
                 html += `
-                    <div class="course-item mb-2 p-2 border rounded">
+                    <div class="course-item mb-2 p-2 border rounded ${roleRowClass}">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
-                                <strong>${course.course_code || 'N/A'}</strong>${isMajor}${isLab}
+                                <strong>${course.course_code || 'N/A'}</strong> ${roleB}${labB}
                                 <br><small class="text-muted">${course.name || 'N/A'}</small>
                                 <br><small class="text-muted">${creditHours} credits | Level ${course.course_level || 100} | ${course.subject || 'N/A'}</small>
                             </div>
                             <div class="text-end ms-3">
                                 <span class="difficulty-badge ${diff.class}">${diff.text}</span>
                                 <br><small class="text-muted">${diffPercent}%</small>
-                                <br>
-                                    <i class="bi bi-award"></i> Grade
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -441,16 +670,40 @@ function loadRecommendations() {
             });
         }
         $('#recommendationsList').html(html);
-    }, function(error) {
-        console.error('Error loading recommendations:', error);
-        $('#recommendationsList').html(`
-            <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle"></i> <strong>Error loading recommendations.</strong>
-                <br><small>Please try again or refresh the page.</small>
-            </div>
-        `);
-        $('#plannerTableContainer').hide();
-    });
+        }, function(error) {
+            console.error('Error loading recommendations:', error);
+            $('#recommendationsList').html(`
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> <strong>Error loading recommendations.</strong>
+                    <br><small>Please try again or refresh the page.</small>
+                </div>
+            `);
+            $('#plannerTableContainer').hide();
+        });
+    };
+
+    if (Object.keys(payload).length > 0) {
+        API.post('/api/student/profile', payload, function(pr) {
+            if (!pr || !pr.success) {
+                $('#recommendationsList').html(`
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>Could not save your goals.</strong>
+                        <br><small>Check your target GPA (0–4) and try again.</small>
+                    </div>
+                `);
+                return;
+            }
+            runFetch();
+        }, function() {
+            $('#recommendationsList').html(`
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> <strong>Network error while saving goals.</strong>
+                </div>
+            `);
+        });
+    } else {
+        runFetch();
+    }
 }
 
 function loadBottlenecks() {
@@ -469,7 +722,8 @@ function loadBottlenecks() {
             if (unlocked.length > 0) {
                 html += `<div class="mb-4">
                     <h6 class="text-success mb-3"><i class="bi bi-check-circle-fill"></i> Courses You Can Take Now (${unlocked.length})</h6>
-                    <p class="text-muted small mb-3">Based on your completed courses, you can take these courses:</p>`;
+                    <p class="text-muted small mb-2">Based on your completed courses, you can take these courses:</p>
+                    <p class="text-muted small mb-3"><i class="bi bi-info-circle"></i> <strong>Unlocks</strong> counts how many courses list this code as a <em>direct</em> prerequisite. Downstream courses still need their other prerequisites satisfied.</p>`;
                 
                 unlocked.slice(0, 12).forEach((course, index) => {
                     const unlocksCount = course.unlocks_count || 0;
@@ -563,6 +817,11 @@ function showProfileModal() {
                 $('#workloadRange').val(profile.workload_tolerance || 0.5);
                 $('#workloadValue').text(profile.workload_tolerance || 0.5);
                 $('#currentSemesterInput').val(profile.current_semester || 1);
+                if (profile.target_semester_gpa != null && profile.target_semester_gpa !== undefined) {
+                    $('#targetSemesterGpaInput').val(profile.target_semester_gpa);
+                } else {
+                    $('#targetSemesterGpaInput').val('');
+                }
             });
         }
     }, function(error) {
@@ -602,12 +861,21 @@ function saveProfile() {
         return;
     }
     
+    const tgtRaw = $('#targetSemesterGpaInput').val();
     const data = {
         major: major,
         current_semester: currentSemester,
         strategy: strategy,
         workload_tolerance: workloadTolerance
     };
+    if (tgtRaw !== '' && tgtRaw != null) {
+        const tg = parseFloat(tgtRaw);
+        if (!isNaN(tg) && tg >= 0 && tg <= 4) {
+            data.target_semester_gpa = tg;
+        }
+    } else {
+        data.target_semester_gpa = null;
+    }
     
     const originalText = saveBtn.innerHTML;
     saveBtn.disabled = true;
@@ -623,6 +891,7 @@ function saveProfile() {
             loadUnlockedCourses();
             loadAvailableCourses();
             loadRecommendations();
+            loadBottlenecks();
             showAlert('Profile updated successfully!', 'success');
         } else {
             const errorMsg = response && response.message ? response.message : 'Failed to update profile';
@@ -645,111 +914,139 @@ function saveProfile() {
     
 }
 
+/** Add-course modal: full list from API + active type filter (major / elective / supporting). */
+var addCourseModalCatalog = { courses: [] };
+
+function addCourseCatalogTag(course) {
+    return catalogBucket(course);
+}
+
+function renderAddCourseCatalogList() {
+    const all = addCourseModalCatalog.courses;
+    const filter = $('input[name="addCourseCatalogFilter"]:checked').val() || 'all';
+    const filtered = filter === 'all' ? all.slice() : all.filter(function (c) {
+        return addCourseCatalogTag(c) === filter;
+    });
+
+    function countTag(tag) {
+        return all.filter(function (c) { return addCourseCatalogTag(c) === tag; }).length;
+    }
+    $('#acfCountAll').text(all.length);
+    $('#acfCountMajor').text(countTag('major'));
+    $('#acfCountElective').text(countTag('elective'));
+    $('#acfCountSupport').text(countTag('support'));
+
+    let html = '';
+    if (all.length === 0) {
+        const q = $('#courseSearchInput').val().trim();
+        html = q.length >= 2
+            ? '<p class="text-muted">No courses match your search, or all matches are already completed.</p>'
+            : '<p class="text-muted">No courses loaded. Set your major in profile, or try a search.</p>';
+        $('#acfCountAll').text('0');
+        $('#acfCountMajor').text('0');
+        $('#acfCountElective').text('0');
+        $('#acfCountSupport').text('0');
+        $('#courseSearchResults').html(html);
+        return;
+    }
+    if (filtered.length === 0) {
+        html = '<p class="text-muted">No courses in this category. Try <strong>All</strong> or another type.</p>';
+        $('#courseSearchResults').html(html);
+        return;
+    }
+
+    const label = filter === 'all' ? 'Showing all types' : (filter === 'major' ? 'Major only' : (filter === 'elective' ? 'Electives only' : 'Supporting only'));
+    html = `<div class="mb-2"><strong>${filtered.length}</strong> of ${all.length} <small class="text-muted">(${label} — completed hidden)</small></div>`;
+    html += '<div style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px;">';
+
+    filtered.forEach(function (course) {
+const tag = addCourseCatalogTag(course);
+const badge = formatCatalogRoleBadge(course);
+        html += `
+            <div class="course-item mb-2 p-2 border rounded" style="cursor: pointer; transition: all 0.2s;"
+                 onmouseover="this.style.backgroundColor='#f8f9fa'"
+                 onmouseout="this.style.backgroundColor='white'"
+                 onclick="selectCourse('${course.course_code}', '${(course.name || 'N/A').replace(/'/g, "\\'")}')">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${course.course_code}</strong>${badge}
+                        <br><small class="text-muted">${course.name || 'N/A'}</small>
+                        <br><small class="text-muted">${course.credit_hours} credits | Level ${course.course_level}</small>
+                    </div>
+                    <i class="bi bi-chevron-right text-primary"></i>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    $('#courseSearchResults').html(html);
+}
+
+function setAddCourseCatalogCourses(courses) {
+    addCourseModalCatalog.courses = courses || [];
+    renderAddCourseCatalogList();
+}
+
 function showAddCourseModal() {
     const modal = new bootstrap.Modal(document.getElementById('addCourseModal'));
     modal.show();
-    
+
     $('#courseSearchInput').val('');
+    $('#acfAll').prop('checked', true);
+    addCourseModalCatalog.courses = [];
     $('#courseSearchResults').html('<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Loading courses...</div>');
     $('#addCourseForm').hide();
     $('#addCourseBtn').hide();
-    
+    $('#addCourseCatalogFilterWrap').show();
+
     loadAllMajorCourses();
-    
-    $('#addCourseModal').on('shown.bs.modal', function() {
+
+    $('#addCourseModal').on('shown.bs.modal', function () {
         $('#courseSearchInput').focus();
     });
 }
 
 function loadAllMajorCourses() {
-    API.get('/api/courses/completed', function(completedResponse) {
-        const completedCourses = (completedResponse.courses || []).map(c => c.course_code);
-        
-        API.get('/api/courses/search', function(response) {
-            const courses = (response.courses || []).filter(c => !completedCourses.includes(c.course_code));
-            
-            let html = '';
-            if (courses.length === 0) {
-                html = '<p class="text-muted">No available courses found. You may have completed all courses for your major, or check your major in profile settings.</p>';
-            } else {
-                html = `<div class="mb-2"><strong>${courses.length} courses available</strong> <small class="text-muted">(Already completed courses are hidden)</small></div>`;
-                html += '<div style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px;">';
-                
-                courses.forEach(course => {
-                    const isMajor = course.is_major_course !== false;
-                    const badge = isMajor ? '<span class="badge bg-primary ms-1">Major</span>' : '<span class="badge bg-secondary ms-1">Prereq</span>';
-                    html += `
-                        <div class="course-item mb-2 p-2 border rounded" style="cursor: pointer; transition: all 0.2s;" 
-                             onmouseover="this.style.backgroundColor='#f8f9fa'" 
-                             onmouseout="this.style.backgroundColor='white'"
-                             onclick="selectCourse('${course.course_code}', '${(course.name || 'N/A').replace(/'/g, "\\'")}')">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>${course.course_code}</strong>${badge}
-                                    <br><small class="text-muted">${course.name || 'N/A'}</small>
-                                    <br><small class="text-muted">${course.credit_hours} credits | Level ${course.course_level}</small>
-                                </div>
-                                <i class="bi bi-chevron-right text-primary"></i>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-            }
-            $('#courseSearchResults').html(html);
-        }, function(error) {
+    API.get('/api/courses/completed', function (completedResponse) {
+        const completedCourses = (completedResponse.courses || []).map(function (c) { return c.course_code; });
+
+        API.get('/api/courses/search', function (response) {
+            const courses = (response.courses || []).filter(function (c) {
+                return !completedCourses.includes(c.course_code);
+            });
+            setAddCourseCatalogCourses(courses);
+        }, function (error) {
             console.error('Error loading courses:', error);
             $('#courseSearchResults').html('<p class="text-danger">Error loading courses. Please try again.</p>');
         });
-    }, function(error) {
-        API.get('/api/courses/search', function(response) {
-            const courses = response.courses || [];
+    }, function (error) {
+        API.get('/api/courses/search', function (response) {
+            setAddCourseCatalogCourses(response.courses || []);
         });
     });
 }
 
-$('#courseSearchInput').on('input', function() {
+$(document).on('change', 'input[name="addCourseCatalogFilter"]', function () {
+    if (addCourseModalCatalog.courses.length) {
+        renderAddCourseCatalogList();
+    }
+});
+
+$('#courseSearchInput').on('input', function () {
     const query = $(this).val().trim();
-    
+
     if (query.length >= 2) {
         $('#courseSearchResults').html('<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div> Searching...</div>');
-        
-        API.get('/api/courses/completed', function(completedResponse) {
-            const completedCourses = (completedResponse.courses || []).map(c => c.course_code);
-            
-            API.get(`/api/courses/search?q=${encodeURIComponent(query)}`, function(response) {
-                const courses = (response.courses || []).filter(c => !completedCourses.includes(c.course_code));
-                
-                let html = '';
-                if (courses.length === 0) {
-                    html = '<p class="text-muted">No courses found matching your search, or all matching courses are already completed.</p>';
-                } else {
-                    html = `<div class="mb-2"><strong>${courses.length} courses found</strong> <small class="text-muted">(Already completed courses are hidden)</small></div>`;
-                    html += '<div style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px;">';
-                    
-                    courses.slice(0, 50).forEach(course => {
-                        const isMajor = course.is_major_course !== false;
-                        const badge = isMajor ? '<span class="badge bg-primary ms-1">Major</span>' : '<span class="badge bg-secondary ms-1">Prereq</span>';
-                        html += `
-                            <div class="course-item mb-2 p-2 border rounded" style="cursor: pointer; transition: all 0.2s;" 
-                                 onmouseover="this.style.backgroundColor='#f8f9fa'" 
-                                 onmouseout="this.style.backgroundColor='white'"
-                                 onclick="selectCourse('${course.course_code}', '${(course.name || 'N/A').replace(/'/g, "\\'")}')">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>${course.course_code}</strong>${badge}
-                                        <br><small class="text-muted">${course.name || 'N/A'}</small>
-                                        <br><small class="text-muted">${course.credit_hours} credits | Level ${course.course_level}</small>
-                                    </div>
-                                    <i class="bi bi-chevron-right text-primary"></i>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                }
-                $('#courseSearchResults').html(html);
-            }, function(error) {
+
+        API.get('/api/courses/completed', function (completedResponse) {
+            const completedCourses = (completedResponse.courses || []).map(function (c) { return c.course_code; });
+
+            API.get('/api/courses/search?q=' + encodeURIComponent(query), function (response) {
+                const courses = (response.courses || []).filter(function (c) {
+                    return !completedCourses.includes(c.course_code);
+                });
+                setAddCourseCatalogCourses(courses.slice(0, 200));
+            }, function (error) {
                 $('#courseSearchResults').html('<p class="text-danger">Error searching courses. Please try again.</p>');
             });
         });
@@ -758,17 +1055,29 @@ $('#courseSearchInput').on('input', function() {
     }
 });
 
+function addCoursePickAnother() {
+    $('#selectedCourseCode').val('');
+    $('#addCourseForm').hide();
+    $('#addCourseBtn').hide();
+    $('#addCourseCatalogFilterWrap').show();
+    loadAllMajorCourses();
+}
+
 function selectCourse(courseCode, courseName) {
     $('#selectedCourseCode').val(courseCode);
     $('#addCourseForm').show();
     $('#addCourseBtn').show();
-    $('#courseSearchResults').html(`
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle"></i> <strong>Selected:</strong> ${courseCode} - ${courseName}
-            <br><small>Fill in the grade and semester below, then click "Add Course"</small>
-        </div>
-    `);
-    
+    $('#addCourseCatalogFilterWrap').hide();
+    $('#courseSearchResults').html(
+        '<div class="alert alert-success mb-0">' +
+        '<i class="bi bi-check-circle"></i> <strong>Selected:</strong> ' + courseCode + ' - ' + courseName +
+        '<br><small>Fill in the grade and semester below, then click &quot;Add Course&quot;</small>' +
+        '<div class="mt-2">' +
+        '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="addCoursePickAnother()">' +
+        '<i class="bi bi-arrow-left"></i> Choose a different course</button>' +
+        '</div></div>'
+    );
+
     $('#addCourseForm')[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -819,9 +1128,20 @@ function addCourse() {
         loadUnlockedCourses();
         loadProfile();
         loadRecommendations();
+        loadBottlenecks();
+        loadAvailableCourses();
+        if (typeof loadAIInsights === 'function') {
+            loadAIInsights();
+        }
         showAlert('Course added successfully!', 'success');
     }, function(error) {
         console.error('Error adding course:', error);
+        if (error && error.prerequisite_error) {
+            const msg = error.user_message || error.message
+                || 'Complete the required prerequisite course(s) in My Courses before adding this course.';
+            showMessageBox('Prerequisites required', msg, 'warning');
+            return;
+        }
         if (error && (error.duplicate || (error.message && error.message.includes('already')))) {
             showAlert(`This course is already in your completed courses. You cannot add the same course multiple times. Edit or remove it from "My Courses" tab.`, 'warning');
             setTimeout(() => {
@@ -866,8 +1186,7 @@ function searchCourses(query) {
                     return;
                 }
                 
-                const isMajor = course.is_major_course !== false;
-                const badge = isMajor ? '<span class="badge bg-primary ms-1">Major</span>' : '<span class="badge bg-secondary ms-1">Prereq</span>';
+                    const badge = formatCatalogRoleBadge(course);
                 html += `
                     <div class="course-item mb-2 p-2 border rounded" style="cursor: pointer; transition: all 0.2s;" 
                          onmouseover="this.style.backgroundColor='#f8f9fa'" 
@@ -1262,6 +1581,8 @@ function saveCourseEdit() {
                 loadProfile();
                 loadUnlockedCourses();
                 loadRecommendations();
+                loadBottlenecks();
+                loadAvailableCourses();
                 showAlert('Course updated successfully!', 'success');
             } else {
                 showAlert(response.message || 'Failed to update course', 'danger');
@@ -1280,30 +1601,30 @@ function saveCourseEdit() {
 
 function loadAvailableCourses() {
     $('#availableCoursesList').html('<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> <small class="d-block mt-2">Loading...</small></div>');
-    
+
     API.get('/api/courses/available?limit=200', function(response) {
         const courses = response.courses || [];
-        
+
         let html = '';
         if (courses.length === 0) {
             html = '<p class="text-muted">No available courses. Complete prerequisites first!</p>';
         } else {
             html = `<div class="mb-2"><strong>${courses.length} courses available</strong> <small class="text-muted">(with fast difficulty predictions)</small></div>`;
-            
+
             courses.slice(0, 100).forEach(course => {
                 const courseCode = course.course_code || 'N/A';
                 if (courseCode === 'N/A') return;
-                
+
                 const difficulty = course.difficulty_score || 0.5;
                 const diff = formatDifficulty(difficulty);
                 const diffPercent = (difficulty * 100).toFixed(0);
                 const isMajor = course.is_major_course !== false;
                 const badge = isMajor ? '<span class="badge bg-primary ms-1">Major</span>' : '<span class="badge bg-secondary ms-1">Prereq</span>';
-                
+
                 const subject = course.subject || '';
                 const isMath = subject.toUpperCase().includes('MATH');
                 const subjectClass = isMath ? 'border-danger' : '';
-                
+
                 html += `
                     <div class="course-item mb-2 p-2 border rounded ${subjectClass}">
                         <div class="d-flex justify-content-between align-items-start">
@@ -1352,6 +1673,8 @@ function deleteCourse(courseId, courseCode) {
                 loadProfile();
                 loadUnlockedCourses();
                 loadRecommendations();
+                loadBottlenecks();
+                loadAvailableCourses();
                 showAlert('Course removed successfully!', 'success');
             } else {
                 showAlert(response.message || 'Failed to remove course', 'danger');
@@ -3240,6 +3563,149 @@ function renderCoursePerformanceTable(coursePerformance) {
 
 function loadAIInsights() {
     loadAcademicRisk();
+    loadPathInsights();
+    loadSemesterTimeline();
+}
+
+function renderSemesterTimelineHTML(semesters) {
+    if (!semesters || !semesters.length) {
+        return '<p class="text-muted mb-0">No completed courses yet. Add courses under <strong>My Courses</strong> and set the <strong>semester</strong> for each.</p>';
+    }
+    let html = '<div class="d-flex flex-row flex-nowrap gap-3 pb-2 academic-journey-scroll" style="overflow-x: auto; scroll-snap-type: x mandatory;">';
+    semesters.forEach(function(block) {
+        const sem = block.semester;
+        const courses = block.courses || [];
+        html += '<div class="flex-shrink-0 rounded-3 shadow-sm border border-2 border-primary p-3 bg-white" style="min-width: 260px; max-width: 320px; scroll-snap-align: start; --bs-border-opacity: .35;">';
+        html += '<div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">';
+        html += '<span class="fs-5 fw-bold text-primary">Semester ' + sem + '</span>';
+        html += '<span class="badge bg-primary">' + (block.total_credits != null ? Number(block.total_credits).toFixed(1) : '0') + ' cr</span></div>';
+        html += '<ul class="list-unstyled small mb-0">';
+        courses.forEach(function(c) {
+            const nm = (c.name || '');
+            html += '<li class="mb-2 pb-2 border-bottom border-light"><div class="fw-semibold">' + (c.course_code || '') + '</div>';
+            html += '<div class="text-muted" style="font-size: 0.8rem;">' + (nm.length > 48 ? nm.substring(0, 48) + '…' : nm) + '</div>';
+            html += '<div><span class="badge bg-light text-dark border">' + (c.grade || '—') + '</span> <span class="text-muted">' + (c.credit_hours != null ? c.credit_hours : '') + ' cr</span></div></li>';
+        });
+        html += '</ul></div>';
+    });
+    html += '</div>';
+    return html;
+}
+
+function loadAcademicJourneySection() {
+    const el = $('#academicJourneySection');
+    if (!el.length) return;
+    el.html('<div class="text-center py-2"><div class="spinner-border spinner-border-sm"></div> <small class="text-muted">Loading journey…</small></div>');
+    API.get('/api/student/semester-timeline', function(response) {
+        if (!response || !response.success || !response.data) {
+            el.html('<p class="text-muted">No timeline data.</p>');
+            return;
+        }
+        const semesters = response.data.semesters || [];
+        el.html(renderSemesterTimelineHTML(semesters));
+    }, function() {
+        el.html('<p class="text-danger small">Could not load academic journey.</p>');
+    });
+}
+
+function loadPathInsights() {
+    $('#pathInsightsCard').html('<div class="text-center py-2"><div class="spinner-border spinner-border-sm"></div> Loading…</div>');
+    API.get('/api/student/insights', function(response) {
+        if (!response || !response.success || !response.data) {
+            $('#pathInsightsCard').html('<p class="text-muted">No insights available.</p>');
+            return;
+        }
+        const d = response.data;
+        let html = '';
+
+        if (d.stats) {
+            html += '<div class="alert alert-light border mb-3 small"><strong>Your record:</strong> ';
+            html += (d.stats.total_credits_completed != null ? d.stats.total_credits_completed + ' credits' : '—');
+            html += ' across <strong>' + (d.stats.semesters_recorded || 0) + '</strong> semester(s)';
+            if (d.stats.avg_credits_per_semester > 0) {
+                html += ' · ~' + d.stats.avg_credits_per_semester + ' cr/semester avg';
+            }
+            html += ' · GPA <strong>' + (d.gpa != null ? Number(d.gpa).toFixed(2) : '—') + '</strong></div>';
+        }
+
+        if (d.warnings && d.warnings.length) {
+            html += '<h6 class="text-danger"><i class="bi bi-exclamation-octagon me-1"></i> Warnings</h6><ul class="small mb-3">';
+            d.warnings.forEach(function(w) { html += '<li>' + w + '</li>'; });
+            html += '</ul>';
+        }
+
+        if (d.recommendation_preview && d.recommendation_preview.length) {
+            html += '<h6 class="text-success"><i class="bi bi-lightbulb me-1"></i> Suggested next courses (app recommendations)</h6><ul class="small mb-3">';
+            d.recommendation_preview.slice(0, 6).forEach(function(x) {
+                html += '<li><strong>' + (x.course_code || '') + '</strong> — ' + (x.name || '') + ' <span class="text-muted">(' + (x.difficulty_category || '') + ')</span></li>';
+            });
+            html += '</ul>';
+        }
+
+        if (d.suggestions && d.suggestions.length) {
+            html += '<h6 class="text-primary">Path suggestions</h6><ul class="small mb-3">';
+            d.suggestions.forEach(function(s) { html += '<li>' + s + '</li>'; });
+            html += '</ul>';
+        }
+
+        if (d.prerequisite_risks && d.prerequisite_risks.length) {
+            html += '<h6 class="mt-2">Prerequisite complexity</h6><p class="small text-muted mb-1">Courses with several missing prerequisites (plan early):</p><ul class="small mb-3">';
+            d.prerequisite_risks.slice(0, 6).forEach(function(x) {
+                html += '<li><strong>' + (x.course_code || '') + '</strong>: need ' + (x.missing_prerequisites || []).join(', ') + '</li>';
+            });
+            html += '</ul>';
+        }
+
+        if (d.delayed_foundations && d.delayed_foundations.length) {
+            html += '<h6 class="mt-2">Major courses not yet taken</h6><p class="small text-muted mb-1">Intro / mid-level ' + (d.major || '') + ' courses still open (consider scheduling):</p><ul class="small mb-3">';
+            d.delayed_foundations.slice(0, 8).forEach(function(x) {
+                html += '<li><strong>' + (x.course_code || '') + '</strong> (level ' + (x.course_level || '') + ') — ' + (x.name || '') + '</li>';
+            });
+            html += '</ul>';
+        }
+
+        if (d.locked_high_impact && d.locked_high_impact.length) {
+            html += '<h6 class="mt-2">High-impact locked courses</h6><p class="small text-muted mb-1">Unlock many later courses once prerequisites are met.</p><ul class="small mb-3">';
+            d.locked_high_impact.slice(0, 8).forEach(function(x) {
+                html += '<li><strong>' + (x.course_code || '') + '</strong> — ~' + (x.unlocks_count || 0) + ' unlocks. Missing: ' + (x.missing_prerequisites || []).join(', ') + '</li>';
+            });
+            html += '</ul>';
+        }
+        if (d.advanced_locked && d.advanced_locked.length) {
+            html += '<h6 class="mt-3">300+ level still locked</h6><ul class="small mb-3">';
+            d.advanced_locked.slice(0, 6).forEach(function(x) {
+                html += '<li>' + (x.course_code || '') + ' (level ' + (x.course_level || '') + '): need ' + (x.missing_prerequisites || []).join(', ') + '</li>';
+            });
+            html += '</ul>';
+        }
+        if (d.next_semester_candidates && d.next_semester_candidates.length) {
+            html += '<h6 class="mt-3">Strong options by unlock impact</h6><ul class="small mb-3">';
+            d.next_semester_candidates.slice(0, 8).forEach(function(x) {
+                html += '<li>' + (x.course_code || '') + ' — ' + (x.name || '') + ' (' + (x.credit_hours || 3) + ' cr, unlocks ~' + (x.unlocks_count || 0) + ')</li>';
+            });
+            html += '</ul>';
+        }
+        if (!html) {
+            html = '<p class="text-muted mb-0">Complete more courses to see path insights.</p>';
+        }
+        $('#pathInsightsCard').html(html);
+    }, function() {
+        $('#pathInsightsCard').html('<p class="text-danger small">Could not load path insights.</p>');
+    });
+}
+
+function loadSemesterTimeline() {
+    $('#semesterTimelineCard').html('<div class="text-center py-2"><div class="spinner-border spinner-border-sm"></div> Loading…</div>');
+    API.get('/api/student/semester-timeline', function(response) {
+        if (!response || !response.success || !response.data) {
+            $('#semesterTimelineCard').html('<p class="text-muted">No timeline data.</p>');
+            return;
+        }
+        const semesters = response.data.semesters || [];
+        $('#semesterTimelineCard').html(renderSemesterTimelineHTML(semesters));
+    }, function() {
+        $('#semesterTimelineCard').html('<p class="text-danger small">Could not load timeline.</p>');
+    });
 }
 
 function loadAcademicRisk() {
