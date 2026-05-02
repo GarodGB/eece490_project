@@ -4,13 +4,20 @@ import io
 import csv
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import get_db, test_connection, engine
+from sqlalchemy import inspect, text
 from database.models import (
     Base,
     Student, Course, StudentCourse, SemesterPlan, SemesterPlanCourse, CourseRating,
     AcademicCalendarEvent, FinancialRecord, Scholarship, StudySession, StudyGoal,
     Assignment, AcademicGoal, CourseWishlist, StudyNote, LearningResource, CourseDifficultyPrediction
 )
-from services.prerequisite_service import get_unlocked_courses, get_locked_courses, is_course_unlocked
+from services.prerequisite_service import (
+    get_unlocked_courses,
+    get_locked_courses,
+    is_course_unlocked,
+    get_completed_courses as student_completed_course_codes,
+    get_prerequisite_codes_merged,
+)
 from services.ml_service import predict_course_difficulty, predict_semester_workload
 from services.recommendation_engine import recommend_courses, optimize_semester_plan
 from services.advisor import explain_course_lock, explain_semester_difficulty, chatbot_response, get_bottleneck_courses
@@ -18,12 +25,33 @@ from services.prerequisite_graph import build_prerequisite_graph
 from config import SECRET_KEY, GRADE_POINTS
 from functools import wraps
 import json
+import logging
+
+if not logging.root.handlers:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+app_log = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 CORS(app)
 
 Base.metadata.create_all(bind=engine)
+
+
+def _ensure_sqlite_student_columns():
+    try:
+        insp = inspect(engine)
+        if 'students' not in insp.get_table_names():
+            return
+        cols = {c['name'] for c in insp.get_columns('students')}
+        if 'target_semester_gpa' not in cols:
+            with engine.begin() as conn:
+                conn.execute(text('ALTER TABLE students ADD COLUMN target_semester_gpa FLOAT'))
+    except Exception as e:
+        print(f"[WARNING] SQLite migration (target_semester_gpa): {e}")
+
+
+_ensure_sqlite_student_columns()
 
 @app.before_request
 def setup():
@@ -226,6 +254,7 @@ def get_profile():
                 'current_semester': student.current_semester,
                 'strategy': student.strategy,
                 'workload_tolerance': student.workload_tolerance,
+                'target_semester_gpa': getattr(student, 'target_semester_gpa', None),
                 'created_at': student.created_at.isoformat() if student.created_at else None,
                 'updated_at': student.updated_at.isoformat() if student.updated_at else None
             }
@@ -266,6 +295,20 @@ def update_profile():
             except (ValueError, TypeError):
                 pass
         
+        if 'target_semester_gpa' in data:
+            try:
+                tg = data['target_semester_gpa']
+                if tg is None or tg == '':
+                    student.target_semester_gpa = None
+                    updated = True
+                else:
+                    tgf = float(tg)
+                    if 0.0 <= tgf <= 4.0:
+                        student.target_semester_gpa = tgf
+                        updated = True
+            except (ValueError, TypeError):
+                pass
+        
         if 'major' in data and data['major']:
             student.major = str(data['major']).upper().strip()
             updated = True
@@ -286,6 +329,7 @@ def update_profile():
                 'current_semester': student.current_semester,
                 'strategy': student.strategy,
                 'workload_tolerance': student.workload_tolerance,
+                'target_semester_gpa': getattr(student, 'target_semester_gpa', None),
                 'gpa': student.gpa
             }
             db.close()
@@ -300,9 +344,7 @@ def update_profile():
             
     except Exception as e:
         db.rollback()
-        import traceback
-        error_msg = f"{str(e)}\n{traceback.format_exc()}"
-        print(f"[ERROR] Profile update failed: {error_msg}")
+        app_log.exception("Profile update failed")
         db.close()
         return jsonify({'success': False, 'message': f'Update failed: {str(e)}'}), 500
 
@@ -348,14 +390,44 @@ def add_completed_course():
     if 'student_id' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
     
-    data = request.json
+    data = request.json or {}
+    course_code_add = (data.get('course_code') or '').strip().upper()
+    if not course_code_add:
+        return jsonify({'success': False, 'message': 'course_code is required'}), 400
+    
+    unlocked, missing_prereqs = is_course_unlocked(session['student_id'], course_code_add)
+    if not unlocked:
+        completed_set = student_completed_course_codes(session['student_id'])
+        direct_codes = get_prerequisite_codes_merged(course_code_add)
+        missing_main = [p for p in direct_codes if p not in completed_set]
+        if not missing_main:
+            missing_main = list(missing_prereqs)
+        main_str = ', '.join(missing_main)
+        full_str = ', '.join(missing_prereqs)
+        user_message = (
+            f'The prerequisite course(s) for {course_code_add} are not completed yet. '
+            f'Please go to My Courses and add those prerequisite course(s) first (with a grade) before adding {course_code_add}. '
+            f'Start with: {main_str}.'
+        )
+        if full_str != main_str:
+            user_message += f' All required courses you still need: {full_str}.'
+        return jsonify({
+            'success': False,
+            'message': user_message,
+            'user_message': user_message,
+            'course_code': course_code_add,
+            'missing_prerequisites': missing_prereqs,
+            'missing_direct_prerequisites': missing_main,
+            'prerequisite_error': True
+        }), 400
+    
     db = get_db()
     
     try:
-        course = db.query(Course).filter(Course.course_code == data['course_code']).first()
+        course = db.query(Course).filter(Course.course_code == course_code_add).first()
         if not course:
             from services.course_cache import get_course_by_code
-            course_data = get_course_by_code(data['course_code'])
+            course_data = get_course_by_code(course_code_add)
             if not course_data:
                 return jsonify({'success': False, 'message': 'Course not found'}), 404
             
@@ -389,7 +461,7 @@ def add_completed_course():
                 return s in ('1', 'true', 'yes', 'y', 't')
             
             course = Course(
-                course_code=safe_str(data['course_code']),
+                course_code=safe_str(course_code_add),
                 subject=safe_str(course_data.get('subject', '')),
                 number=safe_str(course_data.get('number', '')),
                 name=safe_str(course_data.get('name', '')),
@@ -417,7 +489,7 @@ def add_completed_course():
         if existing:
             return jsonify({
                 'success': False, 
-                'message': f'Course {data["course_code"]} is already in your completed courses. You can edit it from the "My Courses" tab.',
+                'message': f'Course {course_code_add} is already in your completed courses. You can edit it from the "My Courses" tab.',
                 'duplicate': True,
                 'existing_id': existing.id
             }), 400
@@ -470,9 +542,7 @@ def add_completed_course():
         })
     except Exception as e:
         db.rollback()
-        import traceback
-        error_msg = f"{str(e)}\n{traceback.format_exc()}"
-        print(f"[ERROR] Add course failed: {error_msg}")
+        app_log.exception("Add course failed")
         return jsonify({'success': False, 'message': f'Failed to add course: {str(e)}'}), 500
     finally:
         db.close()
@@ -527,8 +597,7 @@ def update_completed_course(student_course_id):
         return jsonify({'success': True, 'message': 'Course updated', 'gpa': student.gpa})
     except Exception as e:
         db.rollback()
-        import traceback
-        print(f"[ERROR] Update course failed: {e}\n{traceback.format_exc()}")
+        app_log.exception("Update course failed")
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         db.close()
@@ -579,8 +648,7 @@ def delete_completed_course(student_course_id):
         return jsonify({'success': True, 'message': 'Course deleted', 'gpa': student.gpa})
     except Exception as e:
         db.rollback()
-        import traceback
-        print(f"[ERROR] Delete course failed: {e}\n{traceback.format_exc()}")
+        app_log.exception("Delete course failed")
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         db.close()
@@ -595,12 +663,12 @@ def get_unlocked():
     try:
         limit = int(request.args.get('limit', 150))
         limit = max(10, min(limit, 500))
-        courses = get_unlocked_courses(session['student_id'], filter_by_major=True, limit=limit)
+        courses = get_unlocked_courses(
+            session['student_id'], filter_by_major=True, limit=limit, sort_mode='balanced'
+        )
         return jsonify({'success': True, 'courses': courses})
     except Exception as e:
-        import traceback
-        error_msg = f"{str(e)}\n{traceback.format_exc()}"
-        print(f"[ERROR] /api/courses/unlocked: {error_msg}")
+        app_log.exception("/api/courses/unlocked failed")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
@@ -618,7 +686,9 @@ def get_available_courses_with_difficulty():
         
         limit = int(request.args.get('limit', 150))
         limit = max(10, min(limit, 500))
-        unlocked = get_unlocked_courses(session['student_id'], filter_by_major=True, limit=limit)
+        unlocked = get_unlocked_courses(
+            session['student_id'], filter_by_major=True, limit=limit, sort_mode='balanced'
+        )
         
         completed_rows = (
             db.query(Course.course_code)
@@ -686,7 +756,11 @@ def get_available_courses_with_difficulty():
             buckets[k].sort(key=lambda x: (x.get('course_level', 100), x.get('course_code', '')))
 
         mixed = []
+        _mix_guard = 0
         while len(mixed) < len(courses_with_difficulty) and any(buckets[k] for k in ['Easy', 'Medium', 'Hard']):
+            _mix_guard += 1
+            if _mix_guard > len(courses_with_difficulty) + 10:
+                break
             for k in ['Easy', 'Medium', 'Hard']:
                 if buckets[k]:
                     mixed.append(buckets[k].pop(0))
@@ -694,8 +768,7 @@ def get_available_courses_with_difficulty():
         
         return jsonify({'success': True, 'courses': courses_with_difficulty})
     except Exception as e:
-        import traceback
-        print(f"[ERROR] /api/courses/available: {e}\n{traceback.format_exc()}")
+        app_log.exception("/api/courses/available failed")
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         db.close()
@@ -728,37 +801,48 @@ def search_courses():
         if not student:
             return jsonify({'success': False, 'message': 'Student not found'}), 404
         
-        from services.course_cache import search_courses as cache_search, get_courses_by_subject
-        
+        from services.course_cache import (
+            search_courses as cache_search,
+            get_browse_catalog,
+            catalog_tag,
+        )
+
         if query:
-            all_results = cache_search(query, limit=200)
+            all_results = cache_search(query, limit=250)
         else:
-            if student.major:
-                all_results = get_courses_by_subject(student.major)
-            else:
-                all_results = []
-        
+            all_results = get_browse_catalog(student.major)
+
         result = []
-        for course_data in all_results[:100]:
+        major = student.major
+        for course_data in all_results[:800]:
             course_code = course_data.get('course_code', '')
             if not course_code:
                 continue
-            
+
+            subj = str(course_data.get('subject', '')).strip()
+            tag = catalog_tag(subj, major)
             result.append({
                 'course_code': course_code,
                 'name': course_data.get('name', ''),
-                'subject': course_data.get('subject', ''),
+                'subject': subj,
                 'credit_hours': float(course_data.get('credit_hours', 3.0)),
                 'course_level': int(course_data.get('course_level', 100)),
-                'is_major_course': course_data.get('subject', '').upper() == student.major.upper() if student.major else True
+                'is_major_course': tag == 'major',
+                'catalog_tag': tag,
             })
         
-        result.sort(key=lambda x: (not x.get('is_major_course', True), x['course_level'], x['course_code']))
+        order = {'major': 0, 'elective': 1, 'support': 2}
+        result.sort(
+            key=lambda x: (
+                order.get(x.get('catalog_tag'), 2),
+                x['course_level'],
+                x['course_code'],
+            )
+        )
         
         return jsonify({'success': True, 'courses': result})
     except Exception as e:
-        import traceback
-        print(f"[ERROR] Course search failed: {e}\n{traceback.format_exc()}")
+        app_log.exception("Course search failed")
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         db.close()
@@ -808,8 +892,7 @@ def get_course_difficulty(course_code):
         finally:
             db.close()
     except Exception as e:
-        import traceback
-        print(f"[ERROR] Difficulty prediction failed: {e}\n{traceback.format_exc()}")
+        app_log.exception("Difficulty prediction failed")
         return jsonify({
             'success': True,
             'difficulty': {
@@ -835,6 +918,31 @@ def get_academic_risk():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@app.route('/api/student/insights', methods=['GET'])
+def get_path_insights():
+    if 'student_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    try:
+        from services.insights_service import get_student_insights
+        data = get_student_insights(session['student_id'])
+        return jsonify({'success': True, 'data': data})
+    except Exception as e:
+        app_log.exception("insights failed")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/student/semester-timeline', methods=['GET'])
+def get_semester_timeline_api():
+    if 'student_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    try:
+        from services.insights_service import get_semester_timeline
+        data = get_semester_timeline(session['student_id'])
+        return jsonify({'success': True, 'data': data})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @app.route('/api/recommendations', methods=['GET'])
 def get_recommendations():
     
@@ -845,16 +953,62 @@ def get_recommendations():
         target_credits = int(request.args.get('credits', 15))
         max_courses = int(request.args.get('max_courses', 10))
         term = request.args.get('term', 'Fall')
+
+        override_tol = None
+        override_tg = None
+        if request.args.get('tolerance') is not None and request.args.get('tolerance') != '':
+            try:
+                override_tol = float(request.args.get('tolerance'))
+            except (TypeError, ValueError):
+                override_tol = None
+        if request.args.get('target_gpa') is not None and request.args.get('target_gpa') != '':
+            try:
+                override_tg = float(request.args.get('target_gpa'))
+            except (TypeError, ValueError):
+                override_tg = None
+
+        include_electives = request.args.get('include_electives', '1').lower() not in ('0', 'false', 'no')
+        elective_emphasis = (request.args.get('elective_emphasis') or 'balanced').strip().lower()
+        if elective_emphasis not in ('major_first', 'balanced', 'include_electives'):
+            elective_emphasis = 'balanced'
+
+        override_max_hard = None
+        if request.args.get('max_hard') is not None and request.args.get('max_hard') != '':
+            try:
+                override_max_hard = int(request.args.get('max_hard'))
+            except (TypeError, ValueError):
+                override_max_hard = None
+
+        result = recommend_courses(
+            session['student_id'],
+            target_credits,
+            max_courses,
+            term,
+            override_target_gpa=override_tg,
+            override_tolerance=override_tol,
+            include_electives=include_electives,
+            elective_emphasis=elective_emphasis,
+            override_max_hard=override_max_hard,
+        )
+        recommendations = result.get('recommendations', []) if isinstance(result, dict) else result
         
-        recommendations = recommend_courses(session['student_id'], target_credits, max_courses, term)
-        
+        payload = {
+            'success': True,
+            'recommendations': recommendations or [],
+            'term': term,
+        }
         if not recommendations:
-            return jsonify({'success': True, 'recommendations': [], 'message': 'No recommendations available. Complete prerequisites first!'})
-        
-        return jsonify({'success': True, 'recommendations': recommendations, 'term': term})
+            payload['message'] = 'No recommendations available. Complete prerequisites first!'
+        if isinstance(result, dict):
+            if result.get('semester_workload'):
+                payload['semester_workload'] = result['semester_workload']
+            if result.get('planning_params'):
+                payload['planning_params'] = result['planning_params']
+            if result.get('alternatives') is not None:
+                payload['alternatives'] = result['alternatives']
+        return jsonify(payload)
     except Exception as e:
-        import traceback
-        print(f"[ERROR] Recommendations failed: {e}\n{traceback.format_exc()}")
+        app_log.exception("Recommendations failed")
         return jsonify({'success': True, 'recommendations': [], 'message': 'Recommendations temporarily unavailable'})
 
 
@@ -899,6 +1053,22 @@ def optimize_semester():
         
         if not course_data_list:
             return jsonify({'success': False, 'message': 'No valid courses to analyze'}), 400
+        
+        locked_plan = []
+        for course_code, _cache in course_data_list:
+            ok, missing = is_course_unlocked(session['student_id'], course_code)
+            if not ok:
+                locked_plan.append({'course_code': course_code, 'missing_prerequisites': missing})
+        if locked_plan:
+            return jsonify({
+                'success': False,
+                'message': 'Cannot analyze a semester with locked courses. Complete prerequisites first: '
+                + '; '.join(
+                    f"{x['course_code']} (need: {', '.join(x['missing_prerequisites'])})" for x in locked_plan
+                ),
+                'locked_courses': locked_plan,
+                'prerequisite_error': True
+            }), 400
         
         def safe_float(val, default=0.0):
             try:
@@ -955,8 +1125,7 @@ def optimize_semester():
                     db.refresh(course)
                 except Exception as e:
                     db.rollback()
-                    import traceback
-                    print(f"[ERROR] Failed to create course {course_code}: {e}\n{traceback.format_exc()}")
+                    app_log.exception("Failed to create course %s", course_code)
                     continue
             
             if course:
@@ -980,8 +1149,7 @@ def optimize_semester():
                     'risk_category': 'Medium'
                 }
         except Exception as e:
-            import traceback
-            print(f"[ERROR] ML analysis failed: {e}\n{traceback.format_exc()}")
+            app_log.exception("ML semester analysis failed")
             total_credits = sum([safe_float(cache_course.get('credit_hours', 3.0), 3.0) for _, cache_course in course_data_list])
             num_labs = sum([1 for _, cache_course in course_data_list if cache_course.get('is_lab', False)])
             result = {
@@ -1031,9 +1199,7 @@ def optimize_semester():
         db.close()
         return jsonify({'success': True, 'analysis': result})
     except Exception as e:
-        import traceback
-        error_msg = f"{str(e)}\n{traceback.format_exc()}"
-        print(f"[ERROR] Semester optimize failed: {error_msg}")
+        app_log.exception("Semester optimize failed")
         db.close()
         
         try:
@@ -1084,9 +1250,7 @@ def chat():
             response = "I apologize, but I couldn't generate a response. Please try rephrasing your question."
         return jsonify({'success': True, 'response': response})
     except Exception as e:
-        import traceback
-        error_msg = f"{str(e)}\n{traceback.format_exc()}"
-        print(f"[ERROR] Chatbot error: {error_msg}")
+        app_log.exception("Chatbot error")
         return jsonify({
             'success': True, 
             'response': f"I encountered an error: {str(e)}. Please try again or rephrase your question."
@@ -1501,11 +1665,20 @@ def prerequisite_graph_api():
     try:
         student = db.query(Student).filter(Student.id == session['student_id']).first()
         major = student.major if student else None
-        data = build_prerequisite_graph(session['student_id'], major=major)
+        priority_codes = set()
+        raw = request.args.get('plan_codes', '') or ''
+        for part in raw.replace(';', ',').split(','):
+            p = part.strip().upper()
+            if p:
+                priority_codes.add(p)
+        data = build_prerequisite_graph(
+            session['student_id'],
+            major=major,
+            priority_course_codes=priority_codes if priority_codes else None,
+        )
         return jsonify({'success': True, 'graph': data})
     except Exception as e:
-        import traceback
-        print(f"[ERROR] Prerequisite graph: {e}\n{traceback.format_exc()}")
+        app_log.exception("Prerequisite graph failed")
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         db.close()
@@ -1678,9 +1851,7 @@ def get_calendar_events():
             } for e in events]
         })
     except Exception as e:
-        import traceback
-        error_msg = f"{str(e)}\n{traceback.format_exc()}"
-        print(f"[ERROR] Get calendar events failed: {error_msg}")
+        app_log.exception("Get calendar events failed")
         return jsonify({'success': False, 'message': f'Failed to load calendar events: {str(e)}'}), 500
     finally:
         db.close()
@@ -1738,8 +1909,7 @@ def create_calendar_event():
         })
     except Exception as e:
         db.rollback()
-        import traceback
-        print(f"[ERROR] Create calendar event failed: {e}\n{traceback.format_exc()}")
+        app_log.exception("Create calendar event failed")
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         db.close()
@@ -1930,8 +2100,7 @@ def create_financial_record():
         })
     except Exception as e:
         db.rollback()
-        import traceback
-        print(f"[ERROR] Create financial record failed: {e}\n{traceback.format_exc()}")
+        app_log.exception("Create financial record failed")
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         db.close()
@@ -2231,8 +2400,7 @@ def create_scholarship():
         })
     except Exception as e:
         db.rollback()
-        import traceback
-        print(f"[ERROR] Create scholarship failed: {e}\n{traceback.format_exc()}")
+        app_log.exception("Create scholarship failed")
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         db.close()
@@ -3084,20 +3252,25 @@ def get_wishlist():
         wishlist = db.query(CourseWishlist).filter(
             CourseWishlist.student_id == session['student_id']
         ).order_by(CourseWishlist.priority.desc(), CourseWishlist.created_at.desc()).all()
-        
-        return jsonify({
-            'success': True,
-            'wishlist': [{
+
+        from services.prerequisite_service import is_course_unlocked as _is_unlocked
+
+        items = []
+        for w in wishlist:
+            code = w.course.course_code if w.course else None
+            live_unlocked, _miss = _is_unlocked(session['student_id'], code) if code else (False, [])
+            items.append({
                 'id': w.id,
                 'course_id': w.course_id,
-                'course_code': w.course.course_code if w.course else None,
+                'course_code': code,
                 'course_name': w.course.name if w.course else None,
                 'priority': w.priority,
                 'target_semester': w.target_semester,
                 'notes': w.notes,
-                'is_unlocked': w.is_unlocked
-            } for w in wishlist]
-        })
+                'is_unlocked': live_unlocked,
+            })
+
+        return jsonify({'success': True, 'wishlist': items})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
@@ -3128,8 +3301,12 @@ def add_to_wishlist():
         if existing:
             return jsonify({'success': False, 'message': 'Course already in wishlist'}), 400
         
+        course_row = db.query(Course).filter(Course.id == course_id).first()
+        if not course_row:
+            return jsonify({'success': False, 'message': 'Course not found'}), 404
+        
         from services.prerequisite_service import is_course_unlocked
-        is_unlocked, _ = is_course_unlocked(session['student_id'], None)
+        is_unlocked, _ = is_course_unlocked(session['student_id'], course_row.course_code)
         
         wishlist_item = CourseWishlist(
             student_id=session['student_id'],
@@ -3732,5 +3909,21 @@ def get_performance_dashboard():
 
 
 if __name__ == '__main__':
-    from config import HOST, PORT, DEBUG
-    app.run(host=HOST, port=PORT, debug=DEBUG)
+    import os
+
+    from config import DEBUG, FLASK_USE_RELOADER, HOST, PORT
+
+    run_options = {
+        'host': HOST,
+        'port': PORT,
+        'debug': DEBUG,
+        'threaded': True,
+    }
+    if DEBUG:
+        # Stat reloader + SQLite under the project tree can cause constant restarts; allow disabling.
+        run_options['use_reloader'] = FLASK_USE_RELOADER
+        run_options['use_debugger'] = True
+        # Ignore binary / data churn when matching reloader paths (fnmatch on basenames in filter).
+        run_options['exclude_patterns'] = ['*.db', '*.sqlite3', '*.pkl', '*.pickle']
+
+    app.run(**run_options)
