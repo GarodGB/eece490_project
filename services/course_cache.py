@@ -16,6 +16,9 @@ GEN_ED_ELECTIVE_SUBJECTS = frozenset({
 })
 
 MAJOR_BROWSE_EXTRA_SUBJECTS = {
+    'ECE': frozenset({'EECE'}),
+    'CCE': frozenset({'EECE'}),
+    'CSE': frozenset({'EECE', 'CMPS'}),
     'ENGR': frozenset({'ECE', 'CS', 'CSE'}),
 }
 
@@ -45,8 +48,9 @@ def include_in_elective_catalog(course: Dict) -> bool:
 def catalog_tag(subject: str, major: Optional[str]) -> str:
     s = (subject or '').upper()
     m = (major or '').upper()
+    major_subjects = MAJOR_BROWSE_EXTRA_SUBJECTS.get(m, frozenset())
 
-    if m and s == m:
+    if m and (s == m or s in major_subjects):
         return 'major'
     if s in STRICT_SUPPORT_SUBJECTS:
         return 'support'

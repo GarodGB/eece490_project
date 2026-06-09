@@ -80,10 +80,10 @@ def main():
         )
         _assert(rr.get_json().get("success") is True, rr.get_json())
 
-    # No-prerequisite electives / gen-ed style (verified in catalog)
-    add_course("PSYC101", "A", 1)
-    add_course("ECON101", "B+", 1)
-    add_course("SOC101", "A-", 2)
+    # No-prerequisite courses from the final catalogue.
+    add_course("MATH201", "A", 1)
+    add_course("ENGL203", "B+", 1)
+    add_course("MATH202", "A-", 2)
 
     # --- Semester timeline API (journey visualization data) ---
     r = client.get("/api/student/semester-timeline")
@@ -95,11 +95,11 @@ def main():
     _assert(len(semesters) == 2, f"expected 2 semesters, got {len(semesters)}")
     codes_s1 = {c["course_code"] for c in semesters[0].get("courses", [])}
     codes_s2 = {c["course_code"] for c in semesters[1].get("courses", [])}
-    _assert("PSYC101" in codes_s1 and "ECON101" in codes_s1, f"sem1 codes: {codes_s1}")
-    _assert("SOC101" in codes_s2, f"sem2 codes: {codes_s2}")
+    _assert("MATH201" in codes_s1 and "ENGL203" in codes_s1, f"sem1 codes: {codes_s1}")
+    _assert("MATH202" in codes_s2, f"sem2 codes: {codes_s2}")
     _assert(semesters[0].get("semester") == 1, semesters[0])
     _assert(semesters[1].get("semester") == 2, semesters[1])
-    print("=== semester-timeline: Semester 1 (PSYC101, ECON101), Semester 2 (SOC101) OK ===")
+    print("=== semester-timeline: Semester 1 (MATH201, ENGL203), Semester 2 (MATH202) OK ===")
 
     # --- Insights API (path risks, recommendations preview, stats) ---
     r = client.get("/api/student/insights")
@@ -139,8 +139,8 @@ def main():
     r_hist = chat("what did i take each semester")
     low = r_hist.lower()
     _assert("semester 1" in low or "semester 1:" in low.replace(" ", ""), r_hist[:800])
-    _assert("psyc101" in low, r_hist[:800])
-    _assert("soc101" in low, r_hist[:800])
+    _assert("math201" in low, r_hist[:800])
+    _assert("math202" in low, r_hist[:800])
     print("=== chat semester history: lists Semester 1/2 and course codes OK ===")
 
     r_hi = chat("Hello!")
@@ -168,12 +168,12 @@ def main():
     _assert("major" in tags or "elective" in tags, f"tags sample: {tags}")
     print("=== courses/search (empty q): major + elective catalog OK ===")
 
-    r = client.get("/api/courses/search?q=PSYC")
+    r = client.get("/api/courses/search?q=MATH")
     _assert(r.status_code == 200, r.get_data(as_text=True))
     _assert(r.get_json().get("success") is True, r.get_json())
     codes = [c.get("course_code") for c in (r.get_json().get("courses") or [])]
-    _assert(any("PSYC" in (x or "") for x in codes), codes[:20])
-    print("=== courses/search?q=PSYC: finds psychology courses OK ===")
+    _assert(any("MATH" in (x or "") for x in codes), codes[:20])
+    print("=== courses/search?q=MATH: finds mathematics courses OK ===")
 
     print("")
     print("ALL ADVISOR / INSIGHTS / JOURNEY SCENARIOS PASSED")

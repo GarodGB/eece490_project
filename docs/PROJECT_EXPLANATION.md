@@ -2,7 +2,7 @@
 
 This document explains how the Smart Academic Planning system is built and how data and control flow through it.
 
-> **Where ML Models 1–3 are used (files, APIs, UI)** → see **`ML_MODELS.md`**.
+> **Where all five ML models are used (files, APIs, UI)** → see **`ML_MODELS.md`**.
 > **Detailed technical report (algorithms, feature vectors, scoring, cache vs DB)** → see **`TECHNICAL_REPORT.md`**.
 
 ---
@@ -13,7 +13,7 @@ Smart Academic Planning is a web application that helps students choose courses,
 
 - **Flask** for the backend (Python).
 - **SQLite** by default for the database (no server required). MySQL can be used by setting `USE_MYSQL=1`.
-- **Pre-trained ML models** (XGBoost, Gradient Boosting) for course difficulty, semester workload, and academic risk.
+- **Pre-trained scikit-learn models** for course difficulty, semester workload, academic risk, course success probability, and expected grade.
 - **Bootstrap 5** and **jQuery** on the frontend.
 
 Users register, log in, add completed courses and grades, then get course recommendations, semester plans, prerequisite graphs, financial and study tools, and an optional AI advisor (OpenAI).
@@ -45,7 +45,7 @@ Browser (HTML/JS/CSS)
 - **app.py**: Defines all routes (pages and APIs), uses `get_db()` and services.
 - **services/**: Business logic (prerequisites, recommendations, ML predictions, advisor, cache, graph).
 - **ml/models/**: Pickled models and metadata used by `ml_service.py`.
-- **Training**: Run `python ml/train_all_models.py` to train models **1–3** (see **`ML_MODELS.md`** for purpose and usage of each).
+- **Training**: Run `python ml/train_all_models.py` to train all five models (see **`ML_MODELS.md`** for purpose and usage of each).
 
 ---
 
@@ -190,7 +190,7 @@ Course data and prerequisite lists are centralized in **course_cache** (and ulti
 
 ## 8. How ML Predictions Work (ml_service.py)
 
-- **Models used**: Model 1 (course difficulty), Model 2 (semester workload), Model 3 (academic risk). Stored as pickle files in `ml/models/` with optional metadata (e.g. scaler for Model 2).
+- **Models used**: Model 1 (course difficulty), Model 2 (semester workload), Model 3 (academic risk), Model 4 (course success probability), and Model 5 (expected grade). Artifacts and metadata are stored in `ml/models/`.
 - **load_models()**: Lazy-loads pickle files into module-level variables so they are loaded once per process.
 - **predict_course_difficulty(student_id, course_id)**: Loads student and course from DB, builds a feature vector (e.g. GPA, credits, course features, historical grades), runs Model 1, returns difficulty_score, difficulty_category (Easy/Medium/Hard), and confidence.
 - **predict_semester_workload(student_id, list of course_ids)**: Builds features for the semester (e.g. total credits, per-course difficulty), uses Model 2 (and scaler if present), returns predicted difficulty and overload risk.
@@ -276,7 +276,7 @@ The dashboard calls the APIs above to load and update data without full page rel
 - **Database** layer creates tables on startup and exposes a single engine/session factory; all persistence goes through SQLAlchemy models.
 - **app.py** defines every URL and delegates to services and the DB.
 - **Services** implement prerequisites, recommendations, ML predictions, advisor, and graph; they use `get_db()` and the course cache.
-- **ML** models are loaded from disk and used to predict difficulty, workload, and academic risk.
+- **ML** models are loaded from disk and used to predict difficulty, workload, academic risk, course success probability, and expected grade.
 - **Frontend** uses base template and dashboard JS to call APIs and render the UI; footer shows © 2026 Smart Academic Planning.
 
 Running `python app.py` starts the server; with SQLite, no extra database setup is required beyond creating tables (done automatically). For a full course catalog, run `python scripts/setup_database.py` once after placing the CSV data in the expected paths.

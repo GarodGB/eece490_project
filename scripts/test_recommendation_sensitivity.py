@@ -96,7 +96,7 @@ def main():
         print("NOTE: elective mix same or empty — may be normal with small unlocked pool.")
 
     p = j1.get("planning_params") or {}
-    assert p.get("ranking_mode") == "tol_weighted_adjusted_rank"
+    assert p.get("ranking_mode") == "ml_centered_hybrid_recommender"
     print("planning_params.ranking_mode — OK")
     print("ALL SENSITIVITY CHECKS PASSED")
 

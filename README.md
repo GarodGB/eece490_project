@@ -69,6 +69,8 @@ The recommender then combines ML outputs with academic constraints to create a v
 
 ## Run locally on Windows PowerShell
 
+Use Python 3.11 or 3.12.
+
 Open the project folder:
 
 ```text
