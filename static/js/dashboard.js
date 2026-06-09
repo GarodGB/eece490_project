@@ -68,9 +68,8 @@ $(document).ready(function() {
         $(this).find('button[onclick*="save"], button[onclick*="add"], button[onclick*="create"]').prop('disabled', false);
     });
 
-    $('button[data-bs-target="#prereqGraph"]').on('shown.bs.tab', function() {
-        loadPrereqGraph();
-    });
+    // Prereq graph tab is hidden in the polished version; graph loading disabled.
+    // $('button[data-bs-target="#prereqGraph"]').on('shown.bs.tab', function() { loadPrereqGraph(); });
 
     $('button[data-bs-target="#bottlenecks"]').on('shown.bs.tab', function() {
         loadBottlenecks();
@@ -369,6 +368,8 @@ function loadCompletedCourses() {
                     const count = r.count || 0;
                     const userRating = r.user_rating != null ? r.user_rating : '';
                     const ratingLabel = avg != null ? `Student rating: ${avg} (${count})` : (count ? `Rated by ${count}` : '');
+                    const predDiff = course.difficulty_score != null ? formatDifficulty(Number(course.difficulty_score)) : null;
+                    const predDiffText = course.difficulty_score != null ? `${predDiff.text} (${(Number(course.difficulty_score) * 100).toFixed(0)}%)` : 'not available';
                     html2 += `
                         <div class="course-item mb-2 p-2 border rounded" id="course-${course.id}">
                             <div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -380,9 +381,10 @@ function loadCompletedCourses() {
                                         ${course.credit_hours || 0} credits | 
                                         Semester: <span id="semester-${course.id}">${course.semester_taken || 1}</span>
                                         ${ratingLabel ? '<br><span class="rating-display">' + ratingLabel + '</span>' : ''}
+                                        <br><span class="rating-display">Predicted difficulty: ${predDiffText}</span>
                                     </small>
                                     <div class="mt-1 small">
-                                        <label class="me-1">Rate difficulty (1=easy, 5=hard):</label>
+                                        <label class="me-1">Your optional personal rating (not ML, 1=easy, 5=hard):</label>
                                         <select class="form-select form-select-sm d-inline-block w-auto course-rate-select" data-code="${course.course_code}" data-id="${course.id}">
                                             <option value="">--</option>
                                             <option value="1" ${userRating === 1 ? 'selected' : ''}>1</option>
@@ -621,6 +623,13 @@ function loadRecommendations() {
                 const mhSrc = p.max_hard_source === 'override' ? ' (you set)' : '';
                 const wm = p.workload_model ? `<span class="d-block mt-1 text-muted">${p.workload_model}</span>` : '';
                 html += `<div class="alert rec-alert-soft small mb-3"><strong class="text-body">Plan summary:</strong> intensity ${tol}${cg}${tg}${gm} · up to ${emc} courses · credit cap ${maxCr}${ts} · flex index ${slack} · max Hard: ${mh}${mhSrc}${ew}${ecap}${incEl}${emLb}${wm}</div>`;
+                if (p.target_feasibility_note) {
+                    const alertType = p.target_reachable_with_current_plan === false ? 'alert-danger' : 'alert-success';
+                    html += `<div class="alert ${alertType} small mb-3"><i class="bi bi-flag-fill"></i> <strong>Target semester GPA insight:</strong> ${p.target_feasibility_note}${p.target_gap_after_plan != null && p.target_reachable_with_current_plan === false ? `<div class="small mt-1">Predicted plan is about ${Number(p.target_gap_after_plan).toFixed(2)} GPA points below the target.</div>` : ''}</div>`;
+                }
+                if (p.cumulative_feasibility_note && p.target_feasibility && p.target_feasibility.cumulative_target_reachable_in_one_semester === false) {
+                    html += `<div class="alert alert-danger small mb-3"><i class="bi bi-calculator"></i> <strong>Cumulative GPA math:</strong> ${p.cumulative_feasibility_note}</div>`;
+                }
                 if (p.credit_warning) {
                     html += `<div class="alert alert-warning small mb-3"><i class="bi bi-exclamation-triangle"></i> ${p.credit_warning}</div>`;
                 }
@@ -641,10 +650,15 @@ function loadRecommendations() {
                 html += `<div class="alert rec-alert-soft small mb-3"><strong class="text-body">ML semester workload:</strong> difficulty ${sd} · overload risk ${or}</div>`;
             }
             recommendations.forEach(course => {
-                const difficulty = course.difficulty_score || 0.5;
+                const difficulty = course.expected_difficulty_score || course.difficulty_score || 0.5;
                 const diff = formatDifficulty(difficulty);
                 const diffPercent = (difficulty * 100).toFixed(0);
                 const creditHours = parseFloat(course.credit_hours || 0);
+                const fit = course.ml_fit_score != null ? (Number(course.ml_fit_score) * 100).toFixed(0) + '%' : '—';
+                const success = course.success_probability != null ? (Number(course.success_probability) * 100).toFixed(0) + '%' : '—';
+                const grade = course.expected_grade_points != null ? Number(course.expected_grade_points).toFixed(2) + '/4.3' : '—';
+                const area = course.course_area_label || course.course_area || course.subject || 'course area';
+                const profileNote = course.course_profile_note || '';
                 
                 if (creditHours <= 0) return;
                 
@@ -653,16 +667,22 @@ function loadRecommendations() {
                 const roleRowClass = catalogRoleItemClass(course);
                 
                 html += `
-                    <div class="course-item mb-2 p-2 border rounded ${roleRowClass}">
-                        <div class="d-flex justify-content-between align-items-start">
+                    <div class="course-item mb-2 p-3 border rounded ${roleRowClass}">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
                             <div class="flex-grow-1">
                                 <strong>${course.course_code || 'N/A'}</strong> ${roleB}${labB}
                                 <br><small class="text-muted">${course.name || 'N/A'}</small>
-                                <br><small class="text-muted">${creditHours} credits | Level ${course.course_level || 100} | ${course.subject || 'N/A'}</small>
+                                <br><small class="text-muted">${creditHours} credits | ${area} | Level ${course.course_level || 100}</small>
+                                <div class="mt-2 small">
+                                    <span class="badge bg-light text-dark border me-1">Expected grade ${grade}</span>
+                                    <span class="badge bg-light text-dark border me-1">Fit ${fit}</span>
+                                    <span class="badge bg-light text-dark border me-1">Success ${success}</span>
+                                </div>
+                                ${profileNote ? `<div class="small text-muted mt-2"><i class="bi bi-info-circle"></i> ${profileNote}</div>` : ''}
                             </div>
                             <div class="text-end ms-3">
                                 <span class="difficulty-badge ${diff.class}">${diff.text}</span>
-                                <br><small class="text-muted">${diffPercent}%</small>
+                                <br><small class="text-muted">Difficulty ${diffPercent}%</small>
                             </div>
                         </div>
                     </div>

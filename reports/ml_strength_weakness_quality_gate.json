@@ -1,0 +1,139 @@
+{
+  "upgrade": "strength_weakness_ml_recommender",
+  "files_changed": [
+    "scripts/generate_synthetic_data.py",
+    "ml/model4_course_success_probability.py",
+    "ml/model5_expected_grade.py",
+    "services/ml_service.py",
+    "services/recommendation_engine.py",
+    "app.py",
+    "ml/train_all_models.py"
+  ],
+  "training": "tested full ml/train_all_models.py successfully on 600-student synthetic dataset",
+  "key_metrics": {
+    "model4_success_metrics.json": {
+      "model_name": "Model 4: Course Success Probability",
+      "success_definition": "course grade_points >= 2.3 (C+ or above)",
+      "best_model": "Gradient Boosting",
+      "feature_columns": [
+        "prior_gpa_norm",
+        "recent_avg_norm",
+        "prereq_avg_norm",
+        "subject_avg_norm",
+        "area_strength_norm",
+        "workload_tolerance",
+        "course_level_norm",
+        "credit_norm",
+        "prereq_count_norm",
+        "prereq_depth_norm",
+        "centrality_norm",
+        "is_lab",
+        "prior_credits_norm",
+        "completed_before_norm",
+        "term_load_norm",
+        "course_pressure",
+        "prereq_completed_ratio",
+        "fit_minus_pressure",
+        "weak_area_flag",
+        "strong_area_flag",
+        "is_major_or_core",
+        "is_support",
+        "is_elective"
+      ],
+      "split": "student-level GroupShuffleSplit to avoid same-student leakage",
+      "baseline": {
+        "constant_success_rate_auc": 0.5,
+        "brier": 0.1396
+      },
+      "models": {
+        "Random Forest": {
+          "accuracy": 0.8452,
+          "roc_auc": 0.8901,
+          "brier": 0.1156
+        },
+        "Gradient Boosting": {
+          "accuracy": 0.8847,
+          "roc_auc": 0.891,
+          "brier": 0.0862
+        }
+      }
+    },
+    "model5_expected_grade_metrics.json": {
+      "model_name": "Model 5: Expected AUB Grade Points",
+      "target": "expected course grade points out of 4.3 using pre-attempt features only; cumulative GPA remains capped at 4.0",
+      "best_model": "Gradient Boosting",
+      "feature_columns": [
+        "prior_gpa_norm",
+        "recent_avg_norm",
+        "prereq_avg_norm",
+        "subject_avg_norm",
+        "area_strength_norm",
+        "workload_tolerance",
+        "course_level_norm",
+        "credit_norm",
+        "prereq_count_norm",
+        "prereq_depth_norm",
+        "centrality_norm",
+        "is_lab",
+        "prior_credits_norm",
+        "completed_before_norm",
+        "term_load_norm",
+        "course_pressure",
+        "prereq_completed_ratio",
+        "fit_minus_pressure",
+        "weak_area_flag",
+        "strong_area_flag",
+        "is_major_or_core",
+        "is_support",
+        "is_elective"
+      ],
+      "split": "student-level GroupShuffleSplit to avoid same-student leakage",
+      "baseline_mae": 0.6079,
+      "models": {
+        "Random Forest": {
+          "mae": 0.4075,
+          "rmse": 0.5086,
+          "r2": 0.5383
+        },
+        "Gradient Boosting": {
+          "mae": 0.4028,
+          "rmse": 0.5035,
+          "r2": 0.5474
+        }
+      }
+    },
+    "synthetic_data_strength_weakness_summary.json": {
+      "students": 600,
+      "attempts": 13320,
+      "mean_gpa_capped_4": 2.8873933333333337,
+      "median_gpa_capped_4": 2.9165,
+      "grade_distribution": {
+        "B-": 0.1685,
+        "B+": 0.1642,
+        "B": 0.1491,
+        "C+": 0.1313,
+        "A-": 0.1078,
+        "C": 0.0787,
+        "C-": 0.0576,
+        "A": 0.0572,
+        "A+": 0.044,
+        "D+": 0.0275,
+        "D": 0.0131,
+        "F": 0.001
+      },
+      "area_distribution": {
+        "humanities_business": 0.2616,
+        "computing": 0.2472,
+        "circuits": 0.1343,
+        "math": 0.1026,
+        "systems_control": 0.0866,
+        "lab_project": 0.0728,
+        "physics": 0.0411,
+        "chem_bio": 0.0319,
+        "communication": 0.0172,
+        "signals": 0.0047
+      },
+      "note": "Synthetic outcomes only. Features ending with _before are pre-attempt features for ML training."
+    }
+  }
+}

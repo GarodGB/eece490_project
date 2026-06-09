@@ -1,0 +1,44 @@
+{
+  "model_name": "Model 5: Expected AUB Grade Points",
+  "target": "expected course grade points out of 4.3 using pre-attempt features only; cumulative GPA remains capped at 4.0",
+  "best_model": "Gradient Boosting",
+  "feature_columns": [
+    "prior_gpa_norm",
+    "recent_avg_norm",
+    "prereq_avg_norm",
+    "subject_avg_norm",
+    "area_strength_norm",
+    "workload_tolerance",
+    "course_level_norm",
+    "credit_norm",
+    "prereq_count_norm",
+    "prereq_depth_norm",
+    "centrality_norm",
+    "is_lab",
+    "prior_credits_norm",
+    "completed_before_norm",
+    "term_load_norm",
+    "course_pressure",
+    "prereq_completed_ratio",
+    "fit_minus_pressure",
+    "weak_area_flag",
+    "strong_area_flag",
+    "is_major_or_core",
+    "is_support",
+    "is_elective"
+  ],
+  "split": "student-level GroupShuffleSplit to avoid same-student leakage",
+  "baseline_mae": 0.6167,
+  "models": {
+    "Random Forest": {
+      "mae": 0.4073,
+      "rmse": 0.5093,
+      "r2": 0.5461
+    },
+    "Gradient Boosting": {
+      "mae": 0.4057,
+      "rmse": 0.5076,
+      "r2": 0.5491
+    }
+  }
+}

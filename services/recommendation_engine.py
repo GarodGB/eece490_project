@@ -11,6 +11,8 @@ try:
         predict_course_difficulty,
         predict_semester_workload,
         predict_academic_risk,
+        predict_course_success_probability,
+        predict_expected_grade_points,
     )
 except Exception:
     from services.ml_service import predict_course_difficulty, predict_semester_workload
@@ -23,18 +25,206 @@ except Exception:
             "source": "fallback",
         }
 
+    def predict_course_success_probability(student_id: int, course_id: int, *args, **kwargs):
+        return None
+
+    def predict_expected_grade_points(student_id: int, course_id: int, *args, **kwargs):
+        return None
+
 
 _ELECTIVE_CREDIT_CAP_BY_MAJOR = {
     "ECE": 6.0,
+    "CCE": 6.0,
     "CSE": 6.0,
-    "CS": 6.0,
-    "ENGR": 9.0,
 }
 
 _MAX_PER_NON_MAJOR_SUBJECT = 3
-STRICT_SUPPORT_SUBJECTS = {"MATH", "PHYS", "CHEM", "STAT", "ENGL", "ENG"}
-_CORE_SUPPORT_SUBJECTS = frozenset({"MATH", "PHYS", "CHEM", "STAT"})
 
+STRICT_SUPPORT_SUBJECTS = {
+    "MATH", "PHYS", "CHEM", "STAT", "ENGL", "ENG", "FEAA", "INDE", "CMPS"
+}
+
+_CORE_SUPPORT_SUBJECTS = frozenset({
+    "MATH", "PHYS", "CHEM", "STAT", "CMPS", "FEAA", "INDE"
+})
+
+_ENGINEERING_MAJOR_CODES = {"ECE", "CCE", "CSE"}
+_ENGINEERING_MAJOR_SUBJECTS = {"EECE"}
+
+# Course-topic intelligence used by the final recommender. This is intentionally
+# description/title based so that recommendations do not only depend on department code.
+_COURSE_AREA_KEYWORDS = {
+    "computing": ["program", "algorithm", "data structure", "software", "database", "network", "computer", "coding", "machine learning", "ai"],
+    "circuits": ["circuit", "electronics", "electric", "power", "device", "microelectronic", "semiconductor", "analog"],
+    "signals": ["signal", "image", "speech", "digital processing", "probability", "stochastic", "filter"],
+    "communication": ["communication", "wireless", "antenna", "telecom", "radio", "rf", "networking"],
+    "systems_control": ["control", "robot", "embedded", "system", "automation", "feedback", "dynamic"],
+    "lab_project": ["lab", "laboratory", "project", "design", "capstone", "workshop"],
+    "math": ["calculus", "linear algebra", "differential", "probability", "statistics", "numerical", "discrete"],
+    "physics": ["physics", "mechanics", "electricity", "magnetism", "waves", "thermodynamics"],
+    "chem_bio": ["chem", "bio", "biology", "chemistry", "life sciences"],
+    "humanities_business": ["economy", "economics", "ethics", "communication skills", "writing", "architecture", "business", "management", "humanities"],
+}
+
+_AREA_LABELS = {
+    "computing": "computing/software",
+    "circuits": "circuits/electronics",
+    "signals": "signals/probability",
+    "communication": "communications",
+    "systems_control": "systems/control",
+    "lab_project": "lab/project",
+    "math": "math/quantitative",
+    "physics": "physics",
+    "chem_bio": "chemistry/biology",
+    "humanities_business": "humanities/business",
+}
+
+
+def _infer_course_area_from_values(subject: str, name: str = "", description: str = "") -> str:
+    subj = (subject or "").upper().strip()
+    text = f"{name or ''} {description or ''}".lower()
+    if subj in {"MATH", "STAT"}:
+        return "math"
+    if subj == "PHYS":
+        return "physics"
+    if subj in {"CHEM", "BIOL"}:
+        return "chem_bio"
+    if subj in {"ENGL", "FEAA", "INDE", "ECON", "MNGT"}:
+        return "humanities_business"
+    # Prefer explicit lab/project label even when EECE.
+    if any(k in text for k in _COURSE_AREA_KEYWORDS["lab_project"]):
+        return "lab_project"
+    for area, words in _COURSE_AREA_KEYWORDS.items():
+        if area == "lab_project":
+            continue
+        if any(w in text for w in words):
+            return area
+    if subj == "CMPS":
+        return "computing"
+    if subj == "EECE":
+        return "circuits"
+    return "humanities_business"
+
+
+def _infer_course_area(course: Dict[str, Any]) -> str:
+    return _infer_course_area_from_values(
+        course.get("subject", ""), course.get("name", ""), course.get("description", "")
+    )
+
+
+def _student_area_profile(db, student_id: int) -> Dict[str, Any]:
+    # Uses only already completed courses. No future/outcome leakage.
+    try:
+        from database.models import StudentCourse
+        rows = db.query(StudentCourse).join(Course, Course.id == StudentCourse.course_id).filter(
+            StudentCourse.student_id == student_id,
+            StudentCourse.status == "completed",
+        ).all()
+    except Exception:
+        rows = []
+    grades_by_area: Dict[str, List[float]] = {}
+    grades_by_subject: Dict[str, List[float]] = {}
+    all_grades: List[float] = []
+    credit_values: List[float] = []
+    failed_codes = set()
+    passed_codes = set()
+    weak_pass_codes = set()
+    for row in rows:
+        course = getattr(row, "course", None)
+        gp = _safe_float(getattr(row, "grade_points", None), None)
+        if course is None or gp is None:
+            continue
+        code = str(getattr(course, "course_code", "") or "")
+        subject = str(getattr(course, "subject", "") or "").upper()
+        area = _infer_course_area_from_values(subject, getattr(course, "name", ""), getattr(course, "description", ""))
+        all_grades.append(float(gp))
+        try:
+            cr = float(getattr(course, "credit_hours", 3.0) or 3.0)
+        except Exception:
+            cr = 3.0
+        credit_values.append(max(0.0, cr))
+        grades_by_area.setdefault(area, []).append(float(gp))
+        grades_by_subject.setdefault(subject, []).append(float(gp))
+        # AUB D (1.0) can be a weak pass; F=0 is failed/retake.
+        if gp < 1.0:
+            failed_codes.add(code)
+        else:
+            passed_codes.add(code)
+            if gp < 2.3:
+                weak_pass_codes.add(code)
+    prior_avg = sum(all_grades) / len(all_grades) if all_grades else 3.0
+    area_avg = {k: sum(v) / len(v) for k, v in grades_by_area.items() if v}
+    subject_avg = {k: sum(v) / len(v) for k, v in grades_by_subject.items() if v}
+    weak_areas = {k for k, v in area_avg.items() if v < 2.3}
+    strong_areas = {k for k, v in area_avg.items() if v >= 3.3}
+    return {
+        "prior_avg": prior_avg,
+        "area_avg": area_avg,
+        "subject_avg": subject_avg,
+        "weak_areas": weak_areas,
+        "strong_areas": strong_areas,
+        "failed_codes": failed_codes,
+        "passed_codes": passed_codes,
+        "weak_pass_codes": weak_pass_codes,
+        "completed_credits": sum(credit_values),
+    }
+
+
+def _gpa_feasibility(current_gpa: float, completed_credits: float, planned_credits: float, target_semester_gpa: Optional[float], expected_semester_gpa: float) -> Dict[str, Any]:
+    current_gpa = max(0.0, min(4.0, float(current_gpa or 0.0)))
+    completed_credits = max(0.0, float(completed_credits or 0.0))
+    planned_credits = max(0.0, float(planned_credits or 0.0))
+    expected_semester_gpa = max(0.0, min(4.0, float(expected_semester_gpa or 0.0)))
+    max_semester_gpa = 4.0
+    out = {
+        "target_semester_gpa": target_semester_gpa,
+        "semester_target_reachable_with_plan": None,
+        "semester_target_gap": None,
+        "max_possible_semester_gpa": max_semester_gpa,
+        "expected_cumulative_after_plan": None,
+        "best_possible_cumulative_after_plan": None,
+        "needed_semester_gpa_to_raise_cumulative_to_target": None,
+        "cumulative_target_reachable_in_one_semester": None,
+    }
+    if planned_credits > 0 and completed_credits > 0:
+        out["expected_cumulative_after_plan"] = round((current_gpa * completed_credits + expected_semester_gpa * planned_credits) / (completed_credits + planned_credits), 3)
+        out["best_possible_cumulative_after_plan"] = round((current_gpa * completed_credits + max_semester_gpa * planned_credits) / (completed_credits + planned_credits), 3)
+    if target_semester_gpa is not None:
+        tg = max(0.0, min(4.0, float(target_semester_gpa)))
+        out["semester_target_reachable_with_plan"] = expected_semester_gpa + 1e-6 >= tg
+        out["semester_target_gap"] = round(tg - expected_semester_gpa, 3)
+        if planned_credits > 0 and completed_credits > 0:
+            needed = ((tg * (completed_credits + planned_credits)) - (current_gpa * completed_credits)) / planned_credits
+            out["needed_semester_gpa_to_raise_cumulative_to_target"] = round(needed, 3)
+            out["cumulative_target_reachable_in_one_semester"] = needed <= max_semester_gpa + 1e-6
+    return out
+
+
+def _course_profile_note(area: str, course_type: str, is_weak: bool, is_strong: bool, target_gpa: Optional[float], current_gpa: float) -> str:
+    label = _AREA_LABELS.get(area, area.replace("_", "/"))
+    if is_weak and target_gpa is not None and target_gpa > current_gpa:
+        return f"This is in your weaker {label} area, so the engine treats it as higher risk for GPA improvement."
+    if is_strong:
+        return f"This matches your stronger {label} area, which improves fit for GPA-focused planning."
+    if course_type == "general_elective":
+        return f"This is a {label} elective/support option; it is considered only when it counts toward the plan."
+    return f"This course is profiled as {label} based on title/description and catalogue tags."
+
+
+def _is_major_related_subject(subject_upper: str, student_major: str) -> bool:
+    """
+    Treat EECE courses as major-related for ECE, CCE, and CSE.
+    """
+    subj = (subject_upper or "").upper()
+    maj = (student_major or "").upper()
+
+    if subj == maj:
+        return True
+
+    if maj in _ENGINEERING_MAJOR_CODES and subj in _ENGINEERING_MAJOR_SUBJECTS:
+        return True
+
+    return False
 
 def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
     try:
@@ -107,7 +297,41 @@ def _difficulty_to_category(score: float) -> str:
     if score < 0.70:
         return "Medium"
     return "Hard"
+def _estimate_course_success_probability(
+    gpa_component: float,
+    difficulty_component: float,
+    tolerance_component: float,
+    risk_component: float,
+    goal_component: float,
+    unlocks_count: int,
+    catalog_bucket: str,
+) -> float:
+    """
+    ML-centered success estimate used for ranking and UI explanation.
 
+    Rules still check if the course is allowed.
+    This score helps rank already-valid courses using ML-style signals:
+    difficulty, GPA fit, workload tolerance, academic risk, and goal fit.
+    """
+    unlock_component = _clamp(float(unlocks_count or 0) / 10.0)
+
+    role_adjustment = 0.00
+    if catalog_bucket == "major":
+        role_adjustment = 0.02
+    elif catalog_bucket == "elective":
+        role_adjustment = 0.04
+
+    probability = (
+        0.34 * _clamp(difficulty_component)
+        + 0.22 * _clamp(gpa_component)
+        + 0.16 * _clamp(risk_component)
+        + 0.14 * _clamp(tolerance_component)
+        + 0.08 * _clamp(goal_component)
+        + 0.06 * unlock_component
+        + role_adjustment
+    )
+
+    return _clamp(probability, 0.08, 0.94)
 
 def _make_recommendation_reason(
     course: Dict[str, Any],
@@ -117,6 +341,7 @@ def _make_recommendation_reason(
     academic_risk: Dict[str, Any],
     goal_mode: str,
     tol: float,
+    success_probability: Optional[float] = None,
 ) -> str:
     role = course.get("role_label") or course.get("catalog_bucket") or "Course"
     risk_level = academic_risk.get("risk_level", "Medium")
@@ -142,11 +367,15 @@ def _make_recommendation_reason(
     else:
         goal_text = "matches your current workload profile"
 
+    success_text = ""
+    if success_probability is not None:
+        success_text = f" Estimated success chance: {success_probability:.0%}."
+
     return (
         f"{role} course; prerequisites are satisfied. "
         f"ML predicts {diff_text} ({difficulty_score:.0%}), "
-        f"{fit_text} ({ml_fit_score:.0%}), and {risk_level.lower()} academic risk. "
-        f"It {goal_text} with tolerance {tol:.2f}."
+        f"{fit_text} ({ml_fit_score:.0%}), and {risk_level.lower()} academic risk."
+        f"{success_text} It {goal_text} with tolerance {tol:.2f}."
     )
 
 
@@ -451,22 +680,22 @@ def _compute_goal_planning(
 def _course_type_to_bucket(course_type: str, subject_upper: str, student_major: str) -> str:
     ct = (course_type or "").strip().lower()
     subj = (subject_upper or "").upper()
-    maj = (student_major or "").upper()
 
-    if ct == "core":
+    # Major relationship must override raw course_type. In the adjusted project,
+    # engineering major courses often have subject EECE while the student major is
+    # ECE/CCE/CSE. If we check 'general_elective' first, major courses are treated
+    # as electives and the recommender collapses into tiny/illogical plans.
+    if _is_major_related_subject(subj, student_major):
         return "major"
 
     if ct == "support":
         return "support"
 
-    if ct in ("major_elective", "general_elective"):
-        return "elective"
-
-    if subj == maj:
-        return "major"
-
     if subj in STRICT_SUPPORT_SUBJECTS:
         return "support"
+
+    if ct in ("major_elective", "general_elective"):
+        return "elective"
 
     return "elective"
 
@@ -580,14 +809,13 @@ def recommend_courses(
 
         from database.models import StudentCourse
 
-        completed_rows = db.query(Course.course_code).join(
-            StudentCourse, Course.id == StudentCourse.course_id
-        ).filter(
-            StudentCourse.student_id == student_id,
-            StudentCourse.status == "completed",
-        ).all()
-
-        completed_course_codes = {row[0] for row in completed_rows if row[0]}
+        area_profile = _student_area_profile(db, student_id)
+        # Passed courses should not be recommended again. Failed courses may be retaken.
+        # Weak passes are remembered as weakness signals but are not auto-retaken.
+        completed_course_codes = set(area_profile.get("passed_codes", set()))
+        failed_course_codes = set(area_profile.get("failed_codes", set()))
+        weak_pass_course_codes = set(area_profile.get("weak_pass_codes", set()))
+        completed_credits_for_feasibility = float(area_profile.get("completed_credits", 0.0) or 0.0)
 
         target_gpa = getattr(student, "target_semester_gpa", None)
 
@@ -680,10 +908,13 @@ def recommend_courses(
             subj = str(c.get("subject", "") or "").upper()
             course_type = str(c.get("course_type", "") or "").strip().lower()
 
-            if not course_type:
-                if subj == major_u:
+            # Normalize course role using actual major relationship.
+            # EECE courses are major-path for ECE/CCE/CSE students.
+            if _is_major_related_subject(subj, student.major):
+                if course_type not in {"major_elective"}:
                     course_type = "core"
-                elif subj in STRICT_SUPPORT_SUBJECTS:
+            elif not course_type:
+                if subj in STRICT_SUPPORT_SUBJECTS:
                     course_type = "support"
                 else:
                     course_type = "general_elective"
@@ -693,14 +924,17 @@ def recommend_courses(
             if not include_electives and bucket == "elective":
                 continue
 
-            if em == "major_first" and subj != major_u and subj not in STRICT_SUPPORT_SUBJECTS:
+            if em == "major_first" and not _is_major_related_subject(subj, major_u) and subj not in STRICT_SUPPORT_SUBJECTS:
                 continue
 
+            course_area = _infer_course_area({**c, "subject": subj})
             row = {
                 **c,
                 "course_type": course_type,
                 "catalog_bucket": bucket,
                 "role_label": "Major" if bucket == "major" else ("Support" if bucket == "support" else "Elective"),
+                "course_area": course_area,
+                "course_area_label": _AREA_LABELS.get(course_area, course_area.replace("_", "/")),
             }
 
             valid_courses.append(row)
@@ -738,6 +972,7 @@ def recommend_courses(
                         "Model 1: Course Difficulty Prediction",
                         "Model 2: Semester Workload Estimation",
                         "Model 3: Academic Risk Prediction",
+                        "Model 5: Expected Grade Prediction",
                     ],
                     "academic_risk_score": round(academic_risk_score, 4),
                     "academic_risk_level": academic_risk.get("risk_level", "Medium"),
@@ -821,6 +1056,19 @@ def recommend_courses(
                 student.major,
             )
 
+            course_area = course_data.get("course_area") or _infer_course_area(course_data)
+            area_avg = float(area_profile.get("area_avg", {}).get(course_area, area_profile.get("prior_avg", current_gpa or 3.0)) or 3.0)
+            subject_avg = float(area_profile.get("subject_avg", {}).get(subj, area_avg) or area_avg)
+            is_weak_area = course_area in area_profile.get("weak_areas", set())
+            is_strong_area = course_area in area_profile.get("strong_areas", set())
+
+            # Course description/profile affects difficulty in a personalized way.
+            # Weak areas become more demanding; strong areas become safer, especially for electives.
+            if is_weak_area:
+                difficulty_score = min(1.0, difficulty_score + (0.09 if cb == "major" else 0.06))
+            elif is_strong_area:
+                difficulty_score = max(0.0, difficulty_score - (0.08 if cb == "elective" else 0.04))
+
             difficulty_score = _apply_role_based_difficulty(
                 difficulty_score,
                 cb,
@@ -880,7 +1128,104 @@ def recommend_courses(
 
             ml_risk_impact = _clamp(academic_risk_score * difficulty_score * (1.05 - 0.50 * tol))
 
-            ml_score_multiplier = 1.0 + 0.24 * (ml_fit_score - 0.5) - 0.16 * ml_risk_impact
+            success_result = None
+
+            if db_course:
+                try:
+                    success_result = predict_course_success_probability(
+                        student_id,
+                        db_course.id,
+                        override_tolerance=tol,
+                        override_gpa=current_gpa,
+                    )
+                except TypeError:
+                    success_result = predict_course_success_probability(student_id, db_course.id)
+                except Exception as e:
+                    print(f"[ML WARNING] Model 4 success prediction failed: {e}")
+
+            if success_result and success_result.get("success_probability") is not None:
+                success_probability = _clamp(float(success_result["success_probability"]))
+                success_category = success_result.get("success_category", "Medium")
+                success_model_used = success_result.get("model_used", "Model 4")
+                success_source = success_result.get("source", "model4")
+            else:
+                success_probability = _estimate_course_success_probability(
+                    gpa_component=gpa_component,
+                    difficulty_component=difficulty_component,
+                    tolerance_component=tolerance_component,
+                    risk_component=risk_component,
+                    goal_component=goal_component,
+                    unlocks_count=unlocks_count,
+                    catalog_bucket=cb,
+                )
+                success_category = "High" if success_probability >= 0.75 else ("Medium" if success_probability >= 0.55 else "Low")
+                success_model_used = "Model 4 fallback success score"
+                success_source = "fallback_formula"
+
+            grade_result = None
+            if db_course:
+                try:
+                    grade_result = predict_expected_grade_points(
+                        student_id,
+                        db_course.id,
+                        override_tolerance=tol,
+                        override_gpa=current_gpa,
+                        assumed_term_load=float(target_credits or 15),
+                    )
+                except TypeError:
+                    grade_result = predict_expected_grade_points(student_id, db_course.id)
+                except Exception as e:
+                    print(f"[ML WARNING] Model 5 expected grade prediction failed: {e}")
+
+            if grade_result and grade_result.get("expected_grade_points") is not None:
+                expected_grade_points = max(0.0, min(4.3, float(grade_result.get("expected_grade_points", 2.7))))
+                expected_grade_category = grade_result.get("expected_grade_category", "Good")
+                expected_grade_model = grade_result.get("model_used", "Model 5")
+                expected_grade_source = grade_result.get("source", "model5")
+            else:
+                expected_grade_points = max(0.0, min(4.3, 0.50 * current_gpa + 0.50 * (4.3 * (1.0 - difficulty_score))))
+                expected_grade_category = "Strong" if expected_grade_points >= 3.3 else ("Good" if expected_grade_points >= 2.7 else ("Acceptable" if expected_grade_points >= 2.3 else "Borderline"))
+                expected_grade_model = "Model 5 fallback expected grade"
+                expected_grade_source = "fallback_formula"
+
+            # Student-facing fit should vary by expected grade, area strength, target GPA, and difficulty.
+            grade_component = _clamp(expected_grade_points / 4.0)
+            area_component = _clamp(area_avg / 4.0)
+            subject_component = _clamp(subject_avg / 4.0)
+            area_bonus = (0.08 if is_strong_area else 0.0) - (0.12 if is_weak_area else 0.0)
+            target_component = grade_component
+            if target_gpa is not None and float(target_gpa) > current_gpa + 0.10:
+                # If the goal is GPA improvement, penalize courses expected below the student's current GPA/target.
+                target_component = _clamp((expected_grade_points - max(1.5, current_gpa - 0.10)) / 1.9)
+                if cb == "elective" and is_strong_area:
+                    target_component = min(1.0, target_component + 0.08)
+                if cb == "major" and is_weak_area:
+                    target_component = max(0.0, target_component - 0.08)
+            ml_fit_score = _clamp(
+                0.30 * grade_component
+                + 0.22 * success_probability
+                + 0.14 * difficulty_component
+                + 0.12 * target_component
+                + 0.09 * area_component
+                + 0.05 * subject_component
+                + 0.04 * tolerance_component
+                + 0.04 * risk_component
+                + area_bonus
+            )
+
+            # If the target is high and the course is predicted below target, reduce ranking but do not remove required courses.
+            gpa_goal_penalty = 0.0
+            if target_gpa is not None and expected_grade_points < float(target_gpa):
+                gpa_goal_penalty = min(0.34, (float(target_gpa) - expected_grade_points) * (0.13 if cb != "major" else 0.08))
+
+            ml_score_multiplier = (
+                1.0
+                + 0.34 * (ml_fit_score - 0.5)
+                + 0.18 * (success_probability - 0.5)
+                + 0.20 * (grade_component - 0.65)
+                - 0.18 * ml_risk_impact
+                - gpa_goal_penalty
+            )
             ml_score_multiplier = max(0.78, min(1.24, ml_score_multiplier))
             score *= ml_score_multiplier
 
@@ -892,7 +1237,10 @@ def recommend_courses(
                 academic_risk,
                 goal_mode,
                 tol,
+                success_probability=success_probability,
             )
+            profile_note = _course_profile_note(course_area, course_type, is_weak_area, is_strong_area, target_gpa, current_gpa)
+            reason += f" ML grade outlook: {expected_grade_category}. {profile_note}"
 
             scored_courses.append({
                 **course_data,
@@ -909,6 +1257,24 @@ def recommend_courses(
                 "ml_model_used": ml_model_used or "Course cache + ML ranking",
                 "ml_prediction_source": ml_source,
                 "ml_fit_score": round(float(ml_fit_score), 4),
+                "success_probability": round(float(success_probability), 4),
+                "success_chance": round(float(success_probability), 4),
+                "success_category": success_category,
+                "success_model_used": success_model_used,
+                "success_prediction_source": success_source,
+                "expected_grade_points": round(float(expected_grade_points), 3),
+                "expected_grade_category": expected_grade_category,
+                "expected_grade_model": expected_grade_model,
+                "expected_grade_source": expected_grade_source,
+                "expected_difficulty_score": round(float(difficulty_score), 4),
+                "expected_difficulty_category": category,
+                "course_area": course_area,
+                "course_area_label": _AREA_LABELS.get(course_area, course_area.replace("_", "/")),
+                "student_area_avg": round(float(area_avg), 3),
+                "student_subject_avg": round(float(subject_avg), 3),
+                "student_weak_area": bool(is_weak_area),
+                "student_strong_area": bool(is_strong_area),
+                "course_profile_note": profile_note,
                 "ml_risk_impact": round(float(ml_risk_impact), 4),
                 "ml_rank_score": round(float(score), 4),
                 "academic_risk_level": academic_risk.get("risk_level", "Medium"),
@@ -964,7 +1330,7 @@ def recommend_courses(
                 return False
 
             subj = str(course.get("subject", "") or "").upper() or "UNK"
-            subj_cap = effective_max_courses if major_u and subj == major_u else _MAX_PER_NON_MAJOR_SUBJECT
+            subj_cap = effective_max_courses if _is_major_related_subject(subj, major_u) else _MAX_PER_NON_MAJOR_SUBJECT
 
             if subject_counts.get(subj, 0) >= subj_cap:
                 return False
@@ -1159,6 +1525,41 @@ def recommend_courses(
 
                 try_add(course)
 
+        # Final robust fill pass: if the academic filters left a tiny plan
+        # (for example one course only), add the best remaining valid unlocked
+        # courses while respecting only the hard constraints: not already selected,
+        # positive credits, and total credit cap. This prevents the UI from
+        # returning a nonsense one-course plan when the student requested a real
+        # 12-15 credit semester. The selected courses remain ML-ranked because
+        # fill_candidates are sorted by adjusted_rank_score.
+        if float(target_credits) > 0 and total_credits + 1e-6 < min(float(target_credits), effective_max_credits):
+            fill_candidates = sorted(
+                scored_courses,
+                key=lambda c: -float(c.get("adjusted_rank_score", c.get("recommendation_score", 0)) or 0),
+            )
+            for course in fill_candidates:
+                if len(selected) >= max_courses:
+                    break
+                code = course.get("course_code", "")
+                if not code or code in selected_codes:
+                    continue
+                cr = float(course.get("credit_hours", 0) or 0)
+                if cr <= 0 or total_credits + cr > effective_max_credits + 1e-6:
+                    continue
+                # If target GPA is high, skip courses predicted far below current GPA
+                # unless they are major/support requirements.
+                bucket = course.get("catalog_bucket") or "major"
+                eg = float(course.get("expected_grade_points", current_gpa) or current_gpa)
+                if target_gpa is not None and float(target_gpa) > current_gpa + 0.10 and bucket == "elective" and eg < current_gpa - 0.15:
+                    continue
+                selected.append(course)
+                selected_codes.add(code)
+                total_credits += cr
+                subj = str(course.get("subject", "") or "UNK").upper()
+                subject_counts[subj] = subject_counts.get(subj, 0) + 1
+                if str(course.get("difficulty_category", "")).lower() == "hard":
+                    hard_count += 1
+
         semester_workload: Optional[Dict[str, Any]] = None
         ids: List[int] = []
 
@@ -1218,13 +1619,36 @@ def recommend_courses(
                 "role_label": c.get("role_label", "Elective"),
                 "subject": c.get("subject", ""),
                 "ml_fit_score": c.get("ml_fit_score"),
+                "success_probability": c.get("success_probability"),
+                "success_category": c.get("success_category"),
+                "success_model_used": c.get("success_model_used"),
                 "ml_rank_score": c.get("ml_rank_score"),
                 "academic_risk_level": c.get("academic_risk_level"),
-                "recommendation_reason": c.get("recommendation_reason"),
             })
 
             if len(alternatives) >= 8:
                 break
+
+        expected_points_weighted = 0.0
+        expected_credits_weighted = 0.0
+        for _c in selected:
+            _cr = float(_c.get("credit_hours", 0) or 0)
+            _eg = float(_c.get("expected_grade_points", current_gpa) or current_gpa)
+            if _cr > 0:
+                expected_points_weighted += min(4.3, max(0.0, _eg)) * _cr
+                expected_credits_weighted += _cr
+        expected_semester_gpa = (expected_points_weighted / expected_credits_weighted) if expected_credits_weighted else 0.0
+        # AUB GPA is capped at 4.0 even though A+ quality points are 4.3.
+        expected_semester_gpa_capped = min(4.0, max(0.0, expected_semester_gpa))
+        feasibility = _gpa_feasibility(
+            current_gpa=current_gpa,
+            completed_credits=completed_credits_for_feasibility,
+            planned_credits=expected_credits_weighted,
+            target_semester_gpa=target_gpa,
+            expected_semester_gpa=expected_semester_gpa_capped,
+        )
+        target_reachable = feasibility.get("semester_target_reachable_with_plan")
+        target_gap_after_plan = feasibility.get("semester_target_gap")
 
         planning_params = {
             "goal_mode": goal_mode,
@@ -1254,9 +1678,35 @@ def recommend_courses(
                 "Model 1: Course Difficulty Prediction",
                 "Model 2: Semester Workload Estimation",
                 "Model 3: Academic Risk Prediction",
+                "Model 4: Course Success Probability",
+                "Model 5: Expected Grade Prediction",
+                "Course description/topic profiler",
+                "GPA feasibility calculator",
             ],
             "academic_risk_score": round(float(academic_risk_score), 4),
             "academic_risk_level": academic_risk.get("risk_level", "Medium"),
+            "expected_semester_gpa": round(float(expected_semester_gpa_capped), 3),
+            "target_reachable_with_current_plan": target_reachable,
+            "target_gap_after_plan": target_gap_after_plan,
+            "target_feasibility": feasibility,
+            "target_feasibility_note": (
+                None if target_gpa is None else (
+                    "The predicted semester GPA meets or exceeds your semester target."
+                    if target_reachable else
+                        "This plan is academically valid, but the ML-predicted semester GPA is below the selected goal. The target GPA is used as a soft preference, not a hard rule, because required major courses may still be important for progress."
+                )
+            ),
+            "cumulative_feasibility_note": (
+                None if target_gpa is None else (
+                    "Even with all A/A-level performance this semester, the cumulative GPA target is mathematically impossible in one semester."
+                    if feasibility.get("cumulative_target_reachable_in_one_semester") is False else
+                    "The cumulative target is mathematically reachable only if the semester GPA is high enough."
+                )
+            ),
+            "student_weak_areas": sorted([_AREA_LABELS.get(a, a.replace("_", "/")) for a in area_profile.get("weak_areas", set())]),
+            "student_strong_areas": sorted([_AREA_LABELS.get(a, a.replace("_", "/")) for a in area_profile.get("strong_areas", set())]),
+            "failed_courses_allowed_for_retake": sorted(list(failed_course_codes)),
+            "weak_pass_courses_not_auto_repeated": sorted(list(weak_pass_course_codes)),
             "academic_risk_model": academic_risk.get("model_used", "Model 3"),
             "ai_engine_summary": (
                 "This recommendation is generated by an ML-centered hybrid engine: "

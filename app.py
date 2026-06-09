@@ -366,6 +366,11 @@ def get_completed_courses():
         for sc in student_courses:
             course = db.query(Course).filter(Course.id == sc.course_id).first()
             if course:
+                # Use the course-cache helper, not the Flask route function below.
+                # The route was previously shadowing the helper name and caused
+                # /api/courses/completed to fail after adding a course.
+                from services.course_cache import get_course_difficulty as get_cached_course_difficulty
+                diff_score, diff_cat = get_cached_course_difficulty(course.course_code)
                 courses.append({
                     'id': sc.id,
                     'course_id': course.id,
@@ -374,7 +379,9 @@ def get_completed_courses():
                     'grade': sc.grade,
                     'grade_points': float(sc.grade_points) if sc.grade_points else 0.0,
                     'credit_hours': float(course.credit_hours),
-                    'semester_taken': sc.semester_taken
+                    'semester_taken': sc.semester_taken,
+                    'difficulty_score': float(diff_score),
+                    'difficulty_category': diff_cat
                 })
         
         return jsonify({'success': True, 'courses': courses})
@@ -529,7 +536,7 @@ def add_completed_course():
                 total_points += sc.grade_points * course_obj.credit_hours
                 total_credits += course_obj.credit_hours
         
-        student.gpa = total_points / total_credits if total_credits > 0 else 0.0
+        student.gpa = min(4.0, total_points / total_credits) if total_credits > 0 else 0.0
         if all_courses:
             student.current_semester = max([sc.semester_taken for sc in all_courses if sc.semester_taken] + [1])
         
@@ -590,7 +597,7 @@ def update_completed_course(student_course_id):
                 total_points += sc.grade_points * course.credit_hours
                 total_credits += course.credit_hours
         
-        student.gpa = total_points / total_credits if total_credits > 0 else 0.0
+        student.gpa = min(4.0, total_points / total_credits) if total_credits > 0 else 0.0
         student.current_semester = max([sc.semester_taken for sc in all_courses] + [1])
         
         db.commit()
@@ -638,7 +645,7 @@ def delete_completed_course(student_course_id):
                 total_points += sc.grade_points * course.credit_hours
                 total_credits += course.credit_hours
         
-        student.gpa = total_points / total_credits if total_credits > 0 else 0.0
+        student.gpa = min(4.0, total_points / total_credits) if total_credits > 0 else 0.0
         if all_courses:
             student.current_semester = max([sc.semester_taken for sc in all_courses])
         else:
@@ -798,8 +805,9 @@ def search_courses():
     
     try:
         student = db.query(Student).filter(Student.id == session['student_id']).first()
-        if not student:
-            return jsonify({'success': False, 'message': 'Student not found'}), 404
+        # Be forgiving for demo/testing: if a stale browser session points to a deleted student,
+        # still return the catalog instead of breaking course search.
+        major_for_catalog = student.major if student else 'ECE'
         
         from services.course_cache import (
             search_courses as cache_search,
@@ -810,10 +818,10 @@ def search_courses():
         if query:
             all_results = cache_search(query, limit=250)
         else:
-            all_results = get_browse_catalog(student.major)
+            all_results = get_browse_catalog(major_for_catalog)
 
         result = []
-        major = student.major
+        major = major_for_catalog
         for course_data in all_results[:800]:
             course_code = course_data.get('course_code', '')
             if not course_code:
@@ -849,7 +857,7 @@ def search_courses():
 
 
 @app.route('/api/courses/<course_code>/difficulty', methods=['GET'])
-def get_course_difficulty(course_code):
+def get_course_difficulty_api(course_code):
     
     if 'student_id' not in session:
         return jsonify({'success': False, 'message': 'Not authenticated'}), 401
@@ -1488,7 +1496,7 @@ def gpa_what_if():
             'semester_credits': round(semester_credits, 1),
             'required_gpa_this_semester': round(required_gpa, 2) if achievable else None,
             'achievable': achievable,
-            'message': f'You need a {required_gpa:.2f} GPA this semester to reach {target_gpa} overall.' if achievable else f'To reach {target_gpa} overall you would need {required_gpa:.2f} this semester (not possible; max 4.0).'
+            'message': f'You need a capped semester GPA of {required_gpa:.2f} to reach {target_gpa} overall.' if achievable else f'To reach {target_gpa} overall you would need {required_gpa:.2f} this semester (not possible because GPA is capped at 4.0).'
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -1533,12 +1541,13 @@ def gpa_simulate():
             pts = GRADE_POINTS.get(grade, 0.0)
             total_credits += cred
             total_points += pts * cred
-        new_gpa = (total_points / total_credits) if total_credits > 0 else 0.0
+        raw_new_gpa = (total_points / total_credits) if total_credits > 0 else 0.0
+        new_gpa = min(4.0, raw_new_gpa)
         return jsonify({
             'success': True,
             'simulated_gpa': round(new_gpa, 2),
             'total_credits': round(total_credits, 1),
-            'message': f'With these grades your GPA would be {new_gpa:.2f}.'
+            'message': f'With these grades your capped GPA would be {new_gpa:.2f}.'
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500

@@ -1,0 +1,33 @@
+{
+  "model_name": "Model 2: Semester Workload Estimation",
+  "target": "semester workload index from observed difficulty + credits + labs",
+  "best_model": "Gradient Boosting",
+  "uses_scaler": false,
+  "feature_columns": [
+    "avg_difficulty",
+    "max_difficulty",
+    "var_difficulty",
+    "avg_pressure",
+    "max_pressure",
+    "total_credits_norm",
+    "num_courses_norm",
+    "num_labs_norm",
+    "avg_level_norm",
+    "prior_gpa_norm",
+    "recent_avg_norm",
+    "workload_tolerance"
+  ],
+  "baseline_mae": 0.0953,
+  "models": {
+    "Gradient Boosting": {
+      "mae": 0.0109,
+      "rmse": 0.0143,
+      "r2": 0.9863
+    },
+    "Random Forest": {
+      "mae": 0.0115,
+      "rmse": 0.0171,
+      "r2": 0.9804
+    }
+  }
+}
