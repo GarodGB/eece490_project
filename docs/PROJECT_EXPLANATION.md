@@ -2,7 +2,6 @@
 
 This document explains how the Smart Academic Planning system is built and how data and control flow through it.
 
-> **Team workflow, Git cadence, discussion questions** → see **`PROJECT_GUIDE.md`** (repository root).
 > **Where ML Models 1–3 are used (files, APIs, UI)** → see **`ML_MODELS.md`**.
 > **Detailed technical report (algorithms, feature vectors, scoring, cache vs DB)** → see **`TECHNICAL_REPORT.md`**.
 
