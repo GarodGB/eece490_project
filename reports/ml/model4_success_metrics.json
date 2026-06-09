@@ -1,0 +1,47 @@
+{
+  "model_name": "Model 4: Course Success Probability",
+  "success_definition": "course grade_points >= 2.3 (C+ or above)",
+  "best_model": "Gradient Boosting",
+  "feature_columns": [
+    "prior_gpa_norm",
+    "recent_avg_norm",
+    "prereq_avg_norm",
+    "subject_avg_norm",
+    "area_strength_norm",
+    "workload_tolerance",
+    "course_level_norm",
+    "credit_norm",
+    "prereq_count_norm",
+    "prereq_depth_norm",
+    "centrality_norm",
+    "is_lab",
+    "prior_credits_norm",
+    "completed_before_norm",
+    "term_load_norm",
+    "course_pressure",
+    "prereq_completed_ratio",
+    "fit_minus_pressure",
+    "weak_area_flag",
+    "strong_area_flag",
+    "is_major_or_core",
+    "is_support",
+    "is_elective"
+  ],
+  "split": "student-level GroupShuffleSplit to avoid same-student leakage",
+  "baseline": {
+    "constant_success_rate_auc": 0.5,
+    "brier": 0.1436
+  },
+  "models": {
+    "Random Forest": {
+      "accuracy": 0.8278,
+      "roc_auc": 0.89,
+      "brier": 0.1167
+    },
+    "Gradient Boosting": {
+      "accuracy": 0.8793,
+      "roc_auc": 0.8908,
+      "brier": 0.089
+    }
+  }
+}

@@ -1,0 +1,203 @@
+{
+  "status": "PASS_WITH_SYNTHETIC_DATA_LIMITATION",
+  "students": 250,
+  "course_attempts": 5332,
+  "average_gpa": 2.961,
+  "median_gpa": 3.094,
+  "grade_distribution_percent": {
+    "A": 26.73,
+    "A-": 12.21,
+    "B+": 11.01,
+    "C+": 10.77,
+    "B": 9.11,
+    "B-": 8.44,
+    "C": 7.22,
+    "C-": 5.76,
+    "D+": 3.99,
+    "F": 2.38,
+    "D": 2.38
+  },
+  "models": {
+    "model1_info": {
+      "model_name": "Model 1: Personalized Course Difficulty",
+      "target": "1 - grade_points / 4 using pre-attempt features only",
+      "best_model": "Random Forest",
+      "feature_columns": [
+        "course_level_norm",
+        "credit_norm",
+        "prereq_count_norm",
+        "prereq_depth_norm",
+        "centrality_norm",
+        "is_lab",
+        "course_pressure",
+        "prior_gpa_norm",
+        "recent_avg_norm",
+        "prereq_avg_norm",
+        "workload_tolerance",
+        "prior_credits_norm",
+        "completed_before_norm",
+        "term_load_norm",
+        "prereq_completed_ratio"
+      ],
+      "baseline_mae": 0.2183,
+      "models": {
+        "Random Forest": {
+          "mae": 0.0499,
+          "rmse": 0.0758,
+          "r2": 0.904
+        },
+        "Gradient Boosting": {
+          "mae": 0.0504,
+          "rmse": 0.0742,
+          "r2": 0.9079
+        }
+      }
+    },
+    "model2_info": {
+      "model_name": "Model 2: Semester Workload Estimation",
+      "target": "semester workload index from observed difficulty + credits + labs",
+      "best_model": "Gradient Boosting",
+      "uses_scaler": false,
+      "feature_columns": [
+        "avg_difficulty",
+        "max_difficulty",
+        "var_difficulty",
+        "avg_pressure",
+        "max_pressure",
+        "total_credits_norm",
+        "num_courses_norm",
+        "num_labs_norm",
+        "avg_level_norm",
+        "prior_gpa_norm",
+        "recent_avg_norm",
+        "workload_tolerance"
+      ],
+      "baseline_mae": 0.1184,
+      "models": {
+        "Gradient Boosting": {
+          "mae": 0.0101,
+          "rmse": 0.0136,
+          "r2": 0.9914
+        },
+        "Random Forest": {
+          "mae": 0.0117,
+          "rmse": 0.0175,
+          "r2": 0.9858
+        }
+      }
+    },
+    "model3_info": {
+      "model_name": "Model 3: Future Academic Risk",
+      "target": "risk in future semesters, not same-row rule label",
+      "best_model": "Random Forest",
+      "feature_columns": [
+        "current_gpa",
+        "avg_grade",
+        "avg_recent_grade",
+        "min_recent_grade",
+        "gpa_trend_slope",
+        "failed_count",
+        "low_grade_count",
+        "weak_pass_count",
+        "avg_term_credits",
+        "max_term_credits",
+        "completed_courses",
+        "workload_tolerance"
+      ],
+      "risk_levels": {
+        "0": "Low",
+        "1": "Medium",
+        "2": "High",
+        "3": "Critical"
+      },
+      "rule_baseline_macro_f1": 0.871,
+      "models": {
+        "Gradient Boosting": {
+          "accuracy": 0.907,
+          "macro_f1": 0.8934
+        },
+        "Random Forest": {
+          "accuracy": 0.9302,
+          "macro_f1": 0.934
+        }
+      }
+    },
+    "model4_info": {
+      "model_name": "Model 4: Course Success Probability",
+      "success_definition": "grade_points >= 2.3 using pre-attempt features only",
+      "best_model": "Gradient Boosting",
+      "feature_columns": [
+        "prior_gpa_norm",
+        "recent_avg_norm",
+        "prereq_avg_norm",
+        "workload_tolerance",
+        "course_level_norm",
+        "credit_norm",
+        "prereq_count_norm",
+        "prereq_depth_norm",
+        "centrality_norm",
+        "is_lab",
+        "prior_credits_norm",
+        "completed_before_norm",
+        "term_load_norm",
+        "course_pressure",
+        "prereq_completed_ratio",
+        "fit_minus_pressure"
+      ],
+      "baseline_auc": 0.5,
+      "models": {
+        "Random Forest": {
+          "accuracy": 0.9367,
+          "f1": 0.9603,
+          "roc_auc": 0.9825
+        },
+        "Gradient Boosting": {
+          "accuracy": 0.9511,
+          "f1": 0.9702,
+          "roc_auc": 0.9846
+        }
+      }
+    },
+    "model5_info": {
+      "model_name": "Model 5: Expected AUB Grade Points",
+      "target": "expected grade_points out of 4.0 using pre-attempt features only",
+      "best_model": "Random Forest",
+      "feature_columns": [
+        "prior_gpa_norm",
+        "recent_avg_norm",
+        "prereq_avg_norm",
+        "workload_tolerance",
+        "course_level_norm",
+        "credit_norm",
+        "prereq_count_norm",
+        "prereq_depth_norm",
+        "centrality_norm",
+        "is_lab",
+        "prior_credits_norm",
+        "completed_before_norm",
+        "term_load_norm",
+        "course_pressure",
+        "prereq_completed_ratio",
+        "fit_minus_pressure"
+      ],
+      "baseline_mae": 0.8731,
+      "models": {
+        "Random Forest": {
+          "mae": 0.2003,
+          "rmse": 0.3048,
+          "r2": 0.903
+        },
+        "Gradient Boosting": {
+          "mae": 0.206,
+          "rmse": 0.3,
+          "r2": 0.906
+        }
+      }
+    }
+  },
+  "notes": [
+    "Rules are used for eligibility/prerequisite filtering.",
+    "ML is used for difficulty, workload, future risk, success probability, expected grade, and ranking.",
+    "Student outcomes are synthetic and should not be claimed as validated on real AUB records."
+  ]
+}

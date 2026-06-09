@@ -82,6 +82,27 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Centered message dialog (important notices — not a fleeting toast) -->
+    <div class="modal fade" id="appMessageModal" tabindex="-1" aria-labelledby="appMessageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow border-0">
+                <div class="modal-header border-bottom-0 pb-0" id="appMessageModalHeader">
+                    <h5 class="modal-title d-flex align-items-center gap-2 flex-wrap" id="appMessageModalLabel">
+                        <i class="bi bi-info-circle-fill text-primary" id="appMessageModalIcon" aria-hidden="true"></i>
+                        <span id="appMessageModalTitleText">Notice</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="mb-0 text-body-secondary" id="appMessageModalBody" style="white-space: pre-wrap; line-height: 1.6;"></p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container-fluid px-3 px-md-4">
             <div class="row py-3 py-md-4">

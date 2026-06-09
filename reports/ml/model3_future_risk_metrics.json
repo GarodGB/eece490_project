@@ -1,0 +1,36 @@
+{
+  "model_name": "Model 3: Future Academic Risk",
+  "target": "risk in future semesters, not same-row rule label",
+  "best_model": "Random Forest",
+  "feature_columns": [
+    "current_gpa",
+    "avg_grade",
+    "avg_recent_grade",
+    "min_recent_grade",
+    "gpa_trend_slope",
+    "failed_count",
+    "low_grade_count",
+    "weak_pass_count",
+    "avg_term_credits",
+    "max_term_credits",
+    "completed_courses",
+    "workload_tolerance"
+  ],
+  "risk_levels": {
+    "0": "Low",
+    "1": "Medium",
+    "2": "High",
+    "3": "Critical"
+  },
+  "rule_baseline_macro_f1": 0.5712,
+  "models": {
+    "Gradient Boosting": {
+      "accuracy": 0.7549,
+      "macro_f1": 0.5531
+    },
+    "Random Forest": {
+      "accuracy": 0.7745,
+      "macro_f1": 0.5713
+    }
+  }
+}

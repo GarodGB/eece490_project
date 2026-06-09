@@ -1,497 +1,762 @@
 {
   "CS201": [
-    "CS105",
-    "CS102"
+    "CS108",
+    "CS101",
+    "MATH103",
+    "MATH102"
   ],
   "CS202": [
-    "CS101"
+    "CS104",
+    "MATH102",
+    "PHYS101"
   ],
   "CS203": [
-    "CS101"
+    "CS105",
+    "PHYS101",
+    "ENGL100"
   ],
   "CS204": [
-    "CS101",
-    "MATH101"
+    "CS102",
+    "CS108",
+    "PHYS101"
   ],
   "CS205": [
-    "CS103",
-    "CS101",
-    "MATH101"
+    "CS102",
+    "MATH104"
   ],
   "CS206": [
-    "CS104",
-    "CS105",
-    "MATH101"
+    "CS101",
+    "MATH103"
   ],
   "CS207": [
     "CS104",
-    "CS101"
+    "CS103",
+    "MATH102"
+  ],
+  "CS208": [
+    "CS105",
+    "MATH103"
+  ],
+  "CS209": [
+    "CS101",
+    "MATH103",
+    "PHYS101"
+  ],
+  "CS210": [
+    "CS104",
+    "CS103",
+    "MATH102",
+    "MATH104"
+  ],
+  "CS211": [
+    "CS107",
+    "CS105",
+    "PHYS101",
+    "MATH104"
+  ],
+  "CS212": [
+    "CS106",
+    "MATH101",
+    "ENGL100"
   ],
   "CS301": [
-    "CS205",
-    "MATH101"
+    "CS210",
+    "MATH102"
   ],
   "CS302": [
-    "CS204",
-    "ENGL100"
+    "CS207",
+    "CS211",
+    "MATH103"
   ],
   "CS303": [
     "CS206",
-    "MATH101"
+    "PHYS101",
+    "MATH103"
   ],
   "CS304": [
-    "CS204",
-    "CS201"
+    "CS202",
+    "CS212",
+    "PHYS101",
+    "ENGL100"
   ],
   "CS305": [
-    "CS204",
+    "CS205",
+    "CS203",
     "MATH101"
   ],
   "CS306": [
-    "CS206",
-    "ENGL100"
+    "CS201",
+    "CS210",
+    "ENGL100",
+    "MATH102"
   ],
   "CS307": [
-    "CS202"
+    "CS201",
+    "CS207",
+    "ENGL100"
+  ],
+  "CS308": [
+    "CS212",
+    "MATH104",
+    "ENGL100"
+  ],
+  "CS309": [
+    "CS209",
+    "CS205",
+    "MATH102",
+    "MATH104"
+  ],
+  "CS310": [
+    "CS207",
+    "MATH104"
+  ],
+  "CS311": [
+    "CS212",
+    "CS204",
+    "MATH104",
+    "MATH101"
+  ],
+  "CS312": [
+    "CS201",
+    "MATH102",
+    "PHYS101"
+  ],
+  "CS313": [
+    "CS201",
+    "CS204",
+    "MATH102",
+    "ENGL100"
+  ],
+  "CS314": [
+    "CS212",
+    "MATH102"
   ],
   "CS401": [
     "CS304",
-    "CS305",
-    "MATH101"
+    "CS312",
+    "MATH104"
   ],
   "CS402": [
-    "CS303",
-    "CS305",
-    "CS301",
-    "ENGL100"
+    "CS314",
+    "CS307",
+    "MATH104"
   ],
   "CS403": [
-    "CS303",
+    "CS310",
     "CS305",
-    "MATH101"
+    "CS301",
+    "ENGL100",
+    "MATH103"
   ],
   "CS404": [
+    "CS313",
     "CS305",
-    "CS307",
-    "MATH101",
-    "ENGL100"
+    "CS309",
+    "MATH102"
   ],
   "CS405": [
-    "CS304",
-    "CS301"
+    "CS306",
+    "CS301",
+    "CS302",
+    "MATH101"
   ],
   "CS406": [
-    "CS301",
-    "CS306",
-    "ENGL100"
+    "CS314",
+    "CS302",
+    "CS313",
+    "PHYS101",
+    "MATH104"
   ],
   "CS407": [
-    "CS302",
-    "CS307",
     "CS303",
+    "CS307",
+    "CS312",
+    "MATH104",
+    "ENGL100"
+  ],
+  "CS408": [
+    "CS309",
+    "CS310",
+    "CS308",
+    "PHYS101",
+    "MATH103"
+  ],
+  "CS409": [
+    "CS301",
+    "CS311",
+    "MATH104",
+    "ENGL100"
+  ],
+  "CS410": [
+    "CS310",
+    "CS302",
     "MATH101"
   ],
   "ECE201": [
-    "ECE101"
+    "ECE105",
+    "MATH103",
+    "ENGL100"
   ],
   "ECE202": [
-    "ECE104"
-  ],
-  "ECE203": [
-    "ECE103",
-    "ECE102",
-    "MATH101"
-  ],
-  "ECE204": [
-    "ECE104"
-  ],
-  "ECE205": [
-    "ECE101",
-    "ECE104",
-    "MATH101"
-  ],
-  "ECE301": [
-    "ECE205",
-    "MATH101"
-  ],
-  "ECE302": [
-    "ECE202"
-  ],
-  "ECE303": [
-    "ECE202"
-  ],
-  "ECE304": [
-    "ECE204",
-    "ECE201",
-    "MATH101"
-  ],
-  "ECE305": [
-    "ECE203",
-    "MATH101"
-  ],
-  "ECE401": [
-    "ECE302",
-    "ECE304"
-  ],
-  "ECE402": [
-    "ECE302",
-    "ECE305",
-    "ECE301",
-    "MATH101",
-    "ENGL100"
-  ],
-  "ECE403": [
-    "ECE304",
-    "ECE303",
-    "ECE305",
-    "MATH101",
-    "ENGL100"
-  ],
-  "MATH201": [
-    "MATH102",
-    "MATH104",
-    "MATH101"
-  ],
-  "MATH202": [
-    "MATH102",
-    "MATH105"
-  ],
-  "MATH203": [
-    "MATH103",
-    "MATH101"
-  ],
-  "MATH204": [
-    "MATH105",
-    "MATH101"
-  ],
-  "MATH205": [
-    "MATH102"
-  ],
-  "MATH206": [
-    "MATH101"
-  ],
-  "MATH207": [
-    "MATH104",
-    "MATH102"
-  ],
-  "MATH301": [
-    "MATH202"
-  ],
-  "MATH302": [
-    "MATH204",
-    "ENGL100"
-  ],
-  "MATH303": [
-    "MATH206",
-    "MATH202",
-    "MATH101"
-  ],
-  "MATH304": [
-    "MATH204"
-  ],
-  "MATH305": [
-    "MATH204"
-  ],
-  "MATH306": [
-    "MATH201",
-    "MATH207",
-    "MATH101"
-  ],
-  "MATH307": [
-    "MATH202",
-    "MATH101"
-  ],
-  "MATH401": [
-    "MATH306",
-    "MATH307",
-    "MATH101",
-    "ENGL100"
-  ],
-  "MATH402": [
-    "MATH303",
-    "MATH302"
-  ],
-  "MATH403": [
-    "MATH307",
-    "MATH301",
-    "MATH303",
-    "MATH101"
-  ],
-  "MATH404": [
-    "MATH303",
-    "MATH306",
-    "MATH301",
-    "ENGL100"
-  ],
-  "PHYS201": [
+    "ECE105",
     "PHYS101",
     "PHYS102"
   ],
-  "PHYS202": [
-    "PHYS102",
+  "ECE203": [
+    "ECE103",
+    "ECE101",
+    "CHEM101",
+    "MATH102"
+  ],
+  "ECE204": [
+    "ECE103",
+    "MATH102",
     "MATH101"
+  ],
+  "ECE205": [
+    "ECE102",
+    "ECE105",
+    "PHYS102"
+  ],
+  "ECE206": [
+    "ECE102",
+    "ECE105",
+    "MATH102"
+  ],
+  "ECE207": [
+    "ECE106",
+    "ECE102",
+    "CHEM101",
+    "PHYS102"
+  ],
+  "ECE208": [
+    "ECE102",
+    "ECE105",
+    "CHEM101"
+  ],
+  "ECE209": [
+    "ECE106",
+    "PHYS101",
+    "MATH102"
+  ],
+  "ECE301": [
+    "ECE207",
+    "ENGL100",
+    "CHEM101"
+  ],
+  "ECE302": [
+    "ECE206",
+    "ECE208",
+    "MATH102"
+  ],
+  "ECE303": [
+    "ECE201",
+    "ECE204",
+    "CHEM101"
+  ],
+  "ECE304": [
+    "ECE206",
+    "MATH101",
+    "MATH102"
+  ],
+  "ECE305": [
+    "ECE203",
+    "ECE208",
+    "ENGL100",
+    "MATH103"
+  ],
+  "ECE306": [
+    "ECE202",
+    "CHEM101"
+  ],
+  "ECE307": [
+    "ECE206",
+    "ECE202",
+    "PHYS101"
+  ],
+  "ECE308": [
+    "ECE201",
+    "MATH103"
+  ],
+  "ECE309": [
+    "ECE201",
+    "ECE208",
+    "PHYS102"
+  ],
+  "ECE310": [
+    "ECE204",
+    "MATH102"
+  ],
+  "ECE401": [
+    "ECE302",
+    "ECE307",
+    "MATH101",
+    "CHEM101"
+  ],
+  "ECE402": [
+    "ECE301",
+    "ECE307",
+    "PHYS101",
+    "ENGL100"
+  ],
+  "ECE403": [
+    "ECE306",
+    "ECE307",
+    "ECE303",
+    "MATH101",
+    "PHYS102"
+  ],
+  "ECE404": [
+    "ECE306",
+    "ECE304",
+    "ECE302",
+    "ENGL100"
+  ],
+  "ECE405": [
+    "ECE303",
+    "ECE309",
+    "ECE305",
+    "MATH103"
+  ],
+  "ECE406": [
+    "ECE305",
+    "ECE302",
+    "ECE308",
+    "PHYS101",
+    "CHEM101"
+  ],
+  "MATH201": [
+    "MATH105",
+    "ENGL100"
+  ],
+  "MATH202": [
+    "MATH103",
+    "MATH101",
+    "ENGL100"
+  ],
+  "MATH203": [
+    "MATH103",
+    "MATH101",
+    "ENGL100"
+  ],
+  "MATH204": [
+    "MATH102",
+    "ENGL100"
+  ],
+  "MATH205": [
+    "MATH105",
+    "MATH101",
+    "ENGL100"
+  ],
+  "MATH206": [
+    "MATH101",
+    "MATH105",
+    "ENGL100"
+  ],
+  "MATH207": [
+    "MATH105",
+    "MATH101",
+    "ENGL100"
+  ],
+  "MATH301": [
+    "MATH202",
+    "MATH205",
+    "ENGL100"
+  ],
+  "MATH302": [
+    "MATH207",
+    "ENGL100"
+  ],
+  "MATH303": [
+    "MATH204",
+    "ENGL100"
+  ],
+  "MATH304": [
+    "MATH202",
+    "MATH206",
+    "ENGL100"
+  ],
+  "MATH305": [
+    "MATH204",
+    "MATH206",
+    "ENGL100"
+  ],
+  "MATH306": [
+    "MATH207",
+    "MATH206",
+    "ENGL100"
+  ],
+  "MATH307": [
+    "MATH201",
+    "MATH207",
+    "ENGL100"
+  ],
+  "MATH401": [
+    "MATH307",
+    "MATH301",
+    "ENGL100"
+  ],
+  "MATH402": [
+    "MATH301",
+    "MATH304",
+    "ENGL100"
+  ],
+  "MATH403": [
+    "MATH301",
+    "MATH305",
+    "MATH306",
+    "ENGL100"
+  ],
+  "MATH404": [
+    "MATH306",
+    "MATH305",
+    "MATH303",
+    "ENGL100"
+  ],
+  "PHYS201": [
+    "PHYS102",
+    "PHYS104",
+    "MATH101"
+  ],
+  "PHYS202": [
+    "PHYS103",
+    "MATH102",
+    "MATH103"
   ],
   "PHYS203": [
-    "PHYS103"
+    "PHYS103",
+    "MATH102"
   ],
   "PHYS204": [
-    "PHYS101",
-    "PHYS102",
-    "MATH101"
+    "PHYS103",
+    "CHEM101"
   ],
   "PHYS205": [
-    "PHYS104"
+    "PHYS103",
+    "PHYS101",
+    "MATH101"
   ],
   "PHYS301": [
-    "PHYS205"
+    "PHYS205",
+    "MATH103",
+    "CHEM101"
   ],
   "PHYS302": [
-    "PHYS201",
-    "PHYS203",
+    "PHYS205",
+    "PHYS204",
+    "ENGL100",
     "MATH101"
   ],
   "PHYS303": [
-    "PHYS201",
-    "PHYS203",
-    "MATH101"
+    "PHYS205",
+    "CHEM101",
+    "MATH103"
   ],
   "PHYS304": [
-    "PHYS201",
-    "PHYS205"
+    "PHYS202",
+    "MATH102",
+    "MATH101"
   ],
   "PHYS305": [
     "PHYS201",
-    "PHYS205"
+    "MATH101",
+    "MATH102"
   ],
   "PHYS401": [
+    "PHYS301",
     "PHYS304",
-    "PHYS302",
-    "PHYS303",
-    "MATH101",
     "ENGL100"
   ],
   "PHYS402": [
+    "PHYS305",
     "PHYS304",
-    "PHYS302",
     "PHYS301",
-    "MATH101",
-    "ENGL100"
+    "CHEM101",
+    "MATH103"
   ],
   "PHYS403": [
+    "PHYS303",
     "PHYS304",
-    "PHYS301",
-    "MATH101"
+    "PHYS302",
+    "CHEM101",
+    "MATH102"
   ],
   "CHEM201": [
-    "CHEM102"
+    "CHEM103",
+    "ENGL100",
+    "MATH102"
   ],
   "CHEM202": [
-    "CHEM102",
-    "CHEM103"
+    "CHEM101",
+    "CHEM103",
+    "MATH102",
+    "MATH101"
   ],
   "CHEM203": [
-    "CHEM103",
-    "CHEM102"
+    "CHEM102",
+    "MATH101"
   ],
   "CHEM204": [
-    "CHEM103",
-    "CHEM101"
+    "CHEM102",
+    "CHEM101",
+    "PHYS101"
   ],
   "CHEM301": [
-    "CHEM201"
+    "CHEM204",
+    "MATH101"
   ],
   "CHEM302": [
-    "CHEM202",
-    "CHEM201"
+    "CHEM204",
+    "CHEM203",
+    "MATH101"
   ],
   "CHEM303": [
-    "CHEM202"
+    "CHEM203",
+    "CHEM201",
+    "MATH101"
   ],
   "CHEM401": [
+    "CHEM302",
     "CHEM303",
     "CHEM301",
-    "CHEM302"
+    "MATH102",
+    "PHYS101"
   ],
   "BIO201": [
-    "BIO101",
-    "BIO102"
+    "BIO102",
+    "PHYS105"
   ],
   "BIO202": [
     "BIO101",
-    "BIO103"
+    "BIO102",
+    "MATH101",
+    "PHYS105"
   ],
   "BIO203": [
-    "BIO103"
+    "BIO101",
+    "CHEM102",
+    "MATH101"
   ],
   "BIO204": [
     "BIO103",
-    "BIO102"
+    "ENGL100",
+    "MATH101"
   ],
   "BIO301": [
     "BIO203",
-    "BIO201"
+    "BIO204",
+    "CHEM102"
   ],
   "BIO302": [
     "BIO201",
-    "BIO204"
+    "BIO202",
+    "CHEM101",
+    "CHEM102"
   ],
   "BIO303": [
-    "BIO201",
+    "BIO203",
+    "CHEM101",
     "ENGL100"
   ],
   "BIO401": [
     "BIO302",
+    "BIO303",
     "BIO301",
-    "BIO303"
+    "PHYS105",
+    "ENGL100"
   ],
   "ENGR201": [
     "ENGR103",
-    "ENGR102",
-    "MATH101"
+    "MATH102"
   ],
   "ENGR202": [
-    "ENGR103"
+    "ENGR103",
+    "CHEM101"
   ],
   "ENGR203": [
-    "ENGR103",
-    "ENGR101"
+    "ENGR101",
+    "MATH101",
+    "PHYS102"
   ],
   "ENGR204": [
-    "ENGR102"
+    "ENGR102",
+    "ENGR103",
+    "PHYS101"
   ],
   "ENGR301": [
     "ENGR201",
-    "ENGL100"
+    "MATH102"
   ],
   "ENGR302": [
-    "ENGR203"
+    "ENGR204",
+    "MATH102",
+    "PHYS102"
   ],
   "ENGR303": [
-    "ENGR202",
-    "MATH101"
+    "ENGR203",
+    "ENGR201",
+    "MATH102",
+    "PHYS102"
   ],
   "ENGR401": [
     "ENGR303",
-    "ENGR301",
     "ENGR302",
-    "MATH101",
-    "ENGL100"
+    "ENGR301",
+    "PHYS102",
+    "MATH102"
   ],
   "STAT201": [
     "STAT102",
-    "MATH101"
-  ],
-  "STAT202": [
-    "STAT102",
-    "MATH101"
-  ],
-  "STAT203": [
-    "STAT101"
-  ],
-  "STAT301": [
-    "STAT202",
-    "STAT203",
     "MATH101",
     "ENGL100"
   ],
-  "STAT302": [
+  "STAT202": [
+    "STAT102",
+    "STAT101",
+    "MATH101"
+  ],
+  "STAT203": [
+    "STAT102",
+    "MATH103",
+    "MATH101"
+  ],
+  "STAT301": [
     "STAT201",
+    "STAT203",
+    "ENGL100"
+  ],
+  "STAT302": [
     "STAT203",
     "MATH101",
     "ENGL100"
   ],
   "STAT303": [
     "STAT202",
-    "STAT201",
-    "ENGL100"
+    "STAT203",
+    "MATH101"
   ],
   "STAT401": [
-    "STAT303",
     "STAT302",
+    "STAT303",
     "STAT301",
-    "ENGL100"
+    "MATH103"
   ],
   "ECON201": [
-    "ECON101"
+    "ECON101",
+    "MATH101",
+    "ENGL100"
   ],
   "ECON202": [
-    "ECON101"
+    "ECON102",
+    "ECON101",
+    "MATH101",
+    "ENGL100"
   ],
   "ECON203": [
-    "ECON102"
+    "ECON101",
+    "ECON102",
+    "MATH101",
+    "STAT100"
   ],
   "ECON301": [
     "ECON201",
-    "ECON202"
+    "MATH106"
   ],
   "ECON302": [
     "ECON201",
+    "MATH106",
     "ENGL100"
   ],
   "ECON303": [
-    "ECON202",
-    "ECON201"
+    "ECON201",
+    "STAT100"
   ],
   "ECON401": [
+    "ECON303",
+    "ECON301",
     "ECON302",
-    "ECON303"
+    "MATH101"
   ],
   "PSYC201": [
     "PSYC102",
-    "PSYC101"
+    "PSYC101",
+    "ENGL100",
+    "STAT100"
   ],
   "PSYC202": [
     "PSYC101",
-    "PSYC102"
+    "PSYC102",
+    "BIO105",
+    "ENGL100"
   ],
   "PSYC203": [
-    "PSYC101",
-    "PSYC102"
+    "PSYC102",
+    "STAT100",
+    "BIO105"
   ],
   "PSYC301": [
     "PSYC203",
-    "PSYC202"
+    "ENGL100",
+    "BIO105"
   ],
   "PSYC302": [
-    "PSYC201"
+    "PSYC202",
+    "PSYC201",
+    "BIO105"
   ],
   "PSYC401": [
     "PSYC302",
-    "PSYC301"
+    "PSYC301",
+    "BIO105",
+    "STAT100"
   ],
   "BUS201": [
-    "BUS102"
+    "BUS101",
+    "MATH106"
   ],
   "BUS202": [
-    "BUS101"
+    "BUS102",
+    "BUS101",
+    "STAT100"
   ],
   "BUS203": [
-    "BUS102"
+    "BUS102",
+    "STAT100",
+    "ENGL100"
   ],
   "BUS301": [
     "BUS202",
-    "BUS203",
+    "BUS201",
+    "MATH106",
     "ENGL100"
   ],
   "BUS302": [
-    "BUS202",
-    "ENGL100"
+    "BUS201",
+    "BUS203",
+    "STAT100",
+    "ENGL101"
   ],
   "BUS401": [
+    "BUS302",
     "BUS301",
-    "BUS302"
+    "MATH106"
   ],
   "PHIL201": [
-    "PHIL101"
+    "PHIL101",
+    "PHIL102",
+    "ENGL100"
   ],
   "PHIL202": [
-    "PHIL102"
+    "PHIL102",
+    "ENGL100"
   ],
   "PHIL301": [
-    "PHIL202"
+    "PHIL201",
+    "ENGL100"
   ],
   "PHIL302": [
-    "PHIL202"
+    "PHIL201",
+    "ENGL100"
   ],
   "PHIL401": [
     "PHIL302",
@@ -500,22 +765,28 @@
   ],
   "HIST201": [
     "HIST101",
-    "HIST102"
+    "HIST102",
+    "ENGL100"
   ],
   "HIST202": [
     "HIST101",
-    "HIST102"
+    "HIST102",
+    "ENGL100"
   ],
   "HIST301": [
-    "HIST201"
+    "HIST201",
+    "HIST202",
+    "ENGL100"
   ],
   "HIST302": [
+    "HIST202",
     "HIST201",
     "ENGL100"
   ],
   "HIST401": [
     "HIST302",
-    "HIST301"
+    "HIST301",
+    "ENGL100"
   ],
   "ENGL201": [
     "ENGL102"
@@ -524,260 +795,332 @@
     "ENGL101"
   ],
   "ENGL301": [
-    "ENGL201"
+    "ENGL201",
+    "ENGL202"
   ],
   "ENGL302": [
-    "ENGL202",
     "ENGL201",
-    "ENGL100"
+    "ENGL202"
   ],
   "ENGL401": [
-    "ENGL302",
-    "ENGL301"
+    "ENGL301",
+    "ENGL302"
   ],
   "ART201": [
-    "ART102"
-  ],
-  "ART202": [
-    "ART102",
-    "ART101"
-  ],
-  "ART203": [
-    "ART101",
-    "ART102"
-  ],
-  "ART204": [
-    "ART104"
-  ],
-  "ART205": [
-    "ART102"
-  ],
-  "ART301": [
-    "ART201"
-  ],
-  "ART302": [
-    "ART202",
-    "ART204",
+    "ART103",
+    "ART104",
     "ENGL100"
   ],
-  "ART303": [
-    "ART203",
-    "ART202"
+  "ART202": [
+    "ART103",
+    "ART102",
+    "ENGL100"
   ],
-  "ART304": [
+  "ART203": [
+    "ART103",
+    "ART104",
+    "ENGL100"
+  ],
+  "ART204": [
+    "ART104",
+    "ENGL100"
+  ],
+  "ART205": [
+    "ART103",
+    "ART104",
+    "ENGL100"
+  ],
+  "ART301": [
+    "ART205",
+    "ENGL100"
+  ],
+  "ART302": [
+    "ART203",
     "ART201",
     "ENGL100"
   ],
+  "ART303": [
+    "ART204",
+    "ENGL100"
+  ],
+  "ART304": [
+    "ART203",
+    "ENGL100"
+  ],
   "ART401": [
+    "ART301",
+    "ART303",
     "ART302",
-    "ART303"
+    "ENGL100"
   ],
   "ART402": [
-    "ART302",
     "ART301",
     "ART304",
+    "ART302",
     "ENGL100"
   ],
   "MED201": [
-    "MED101"
+    "MED101",
+    "MED103",
+    "CHEM101",
+    "BIO101"
   ],
   "MED202": [
-    "MED101"
+    "MED101",
+    "MED102",
+    "MATH102",
+    "MATH101"
   ],
   "MED203": [
-    "MED103"
+    "MED102",
+    "PHYS102",
+    "PHYS101"
   ],
   "MED204": [
     "MED103",
-    "MED101"
+    "PHYS101",
+    "CHEM102"
   ],
   "MED301": [
     "MED204",
-    "MED203"
+    "MED203",
+    "BIO102"
   ],
   "MED302": [
-    "MED201",
-    "MED202"
+    "MED203",
+    "PHYS102"
   ],
   "MED303": [
-    "MED202",
-    "MED203"
+    "MED203",
+    "MATH102"
   ],
   "MED401": [
-    "MED302",
     "MED301",
     "MED303",
+    "PHYS101",
     "ENGL100"
   ],
   "MED402": [
     "MED303",
-    "MED301"
+    "MED302",
+    "MED301",
+    "MATH101",
+    "ENGL100"
   ],
   "LAW201": [
-    "LAW103",
-    "LAW101"
+    "LAW102",
+    "HIST101",
+    "ENGL101"
   ],
   "LAW202": [
-    "LAW102"
+    "LAW102",
+    "LAW103",
+    "ENGL100",
+    "ENGL101"
   ],
   "LAW203": [
-    "LAW103",
-    "LAW101"
+    "LAW102",
+    "HIST101"
   ],
   "LAW204": [
-    "LAW103",
-    "LAW102"
+    "LAW102",
+    "ENGL100",
+    "ENGL101"
   ],
   "LAW301": [
-    "LAW204"
+    "LAW204",
+    "LAW202",
+    "ENGL101"
   ],
   "LAW302": [
-    "LAW204"
+    "LAW201",
+    "HIST101",
+    "ENGL101"
   ],
   "LAW303": [
-    "LAW202",
     "LAW204",
-    "ENGL100"
+    "ENGL101",
+    "HIST101"
   ],
   "LAW304": [
     "LAW204",
-    "LAW201",
-    "ENGL100"
+    "ENGL101"
   ],
   "LAW401": [
-    "LAW302",
     "LAW301",
-    "ENGL100"
+    "LAW304",
+    "ENGL100",
+    "HIST101"
   ],
   "LAW402": [
-    "LAW303",
     "LAW304",
-    "ENGL100"
+    "LAW303",
+    "LAW301",
+    "HIST101"
   ],
   "LAW403": [
-    "LAW301",
     "LAW303",
-    "LAW304"
+    "LAW301",
+    "ENGL100",
+    "HIST101"
   ],
   "MUS201": [
+    "MUS102",
     "MUS103",
-    "MUS102"
+    "ENGL100"
   ],
   "MUS202": [
-    "MUS103",
-    "MUS102"
+    "MUS104",
+    "MUS101",
+    "ENGL100"
   ],
   "MUS203": [
-    "MUS102"
+    "MUS101",
+    "ENGL100"
   ],
   "MUS204": [
-    "MUS103"
+    "MUS101",
+    "ENGL100"
   ],
   "MUS205": [
-    "MUS101"
+    "MUS103",
+    "ENGL100"
   ],
   "MUS301": [
-    "MUS205",
-    "MUS204"
+    "MUS203",
+    "MUS201",
+    "ENGL100"
   ],
   "MUS302": [
-    "MUS201"
+    "MUS202",
+    "MUS204",
+    "ENGL100"
   ],
   "MUS303": [
-    "MUS202",
-    "MUS203",
+    "MUS201",
     "ENGL100"
   ],
   "MUS304": [
-    "MUS205"
+    "MUS202",
+    "MUS204",
+    "ENGL100"
   ],
   "MUS401": [
     "MUS302",
-    "MUS303"
+    "MUS304",
+    "ENGL100"
   ],
   "MUS402": [
     "MUS301",
-    "MUS303",
-    "MUS304"
+    "MUS302",
+    "MUS304",
+    "ENGL100"
   ],
   "SOC201": [
     "SOC102",
-    "SOC101"
+    "SOC101",
+    "ENGL100"
   ],
   "SOC202": [
-    "SOC102",
-    "SOC101"
+    "SOC101",
+    "STAT100",
+    "ENGL100"
   ],
   "SOC203": [
     "SOC102",
-    "SOC101"
+    "STAT100",
+    "ENGL100"
   ],
   "SOC204": [
-    "SOC101"
+    "SOC101",
+    "SOC102",
+    "STAT100"
   ],
   "SOC301": [
-    "SOC204",
+    "SOC202",
+    "SOC203",
+    "STAT100",
     "ENGL100"
   ],
   "SOC302": [
-    "SOC201",
+    "SOC204",
+    "STAT100",
     "ENGL100"
   ],
   "SOC303": [
-    "SOC203",
-    "SOC204"
+    "SOC204",
+    "ENGL100",
+    "STAT100"
   ],
   "SOC304": [
-    "SOC204",
+    "SOC202",
+    "SOC203",
     "ENGL100"
   ],
   "SOC401": [
+    "SOC302",
     "SOC304",
-    "SOC301",
-    "ENGL100"
+    "SOC303",
+    "ENGL100",
+    "STAT100"
   ],
   "SOC402": [
     "SOC302",
+    "SOC301",
     "SOC303",
-    "SOC304"
+    "ENGL100"
   ],
   "POL201": [
     "POL101",
-    "POL102"
+    "HIST101",
+    "STAT100"
   ],
   "POL202": [
+    "POL102",
     "POL103",
-    "POL102"
+    "STAT100",
+    "ENGL100"
   ],
   "POL203": [
-    "POL101"
+    "POL101",
+    "POL102",
+    "STAT100"
   ],
   "POL204": [
-    "POL102",
-    "POL103"
+    "POL101",
+    "ENGL100"
   ],
   "POL301": [
     "POL202",
-    "POL203",
     "ENGL100"
   ],
   "POL302": [
-    "POL204",
-    "POL203"
+    "POL203",
+    "POL202",
+    "HIST101",
+    "ENGL100"
   ],
   "POL303": [
-    "POL201"
+    "POL201",
+    "HIST101",
+    "STAT100"
   ],
   "POL304": [
-    "POL202",
+    "POL201",
+    "POL203",
     "ENGL100"
   ],
   "POL401": [
     "POL304",
-    "POL303"
+    "POL302",
+    "POL303",
+    "HIST101",
+    "ENGL100"
   ],
   "POL402": [
-    "POL301",
-    "POL302"
+    "POL303",
+    "POL304",
+    "HIST101",
+    "ENGL100"
   ]
 }

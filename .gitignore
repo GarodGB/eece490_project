@@ -19,5 +19,4 @@ instance/*.db
 .vscode/
 .DS_Store
 
-# Trained models (uncomment if you do not want .pkl in git)
-ml/models/*.pkl
+# Trained models are project artifacts and are intentionally versioned.

@@ -1,4 +1,7 @@
+import logging
 from sqlalchemy import create_engine, text
+
+logger = logging.getLogger(__name__)
 from sqlalchemy.orm import sessionmaker, scoped_session
 from config import USE_MYSQL, SQLITE_DB_PATH, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 from database.models import Base
@@ -39,7 +42,7 @@ def init_db():
         Base.metadata.create_all(bind=engine)
         print("[OK] Created all tables")
     except Exception as e:
-        print(f"[ERROR] Database initialization failed: {e}")
+        logger.exception("Database initialization failed")
         raise
 
 def get_db():
@@ -61,5 +64,5 @@ def test_connection():
             result = conn.execute(text("SELECT 1"))
             return True
     except Exception as e:
-        print(f"[ERROR] Database connection failed: {e}")
+        logger.error("Database connection failed: %s", e)
         return False

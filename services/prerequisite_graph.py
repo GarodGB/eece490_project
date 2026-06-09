@@ -1,7 +1,6 @@
 
-from typing import List, Dict, Set, Tuple
+from typing import List, Dict, Set, Optional
 from services.course_cache import (
-    get_prerequisites,
     get_courses_by_subject,
     get_course_by_code,
     load_prerequisites_cache,
@@ -9,12 +8,24 @@ from services.course_cache import (
 from services.prerequisite_service import get_completed_courses, is_course_unlocked
 
 
-def build_prerequisite_graph(student_id: int, major: str = None, limit_nodes: int = 200) -> Dict:
-    
+def build_prerequisite_graph(
+    student_id: int,
+    major: str = None,
+    limit_nodes: int = 200,
+    priority_course_codes: Optional[Set[str]] = None,
+) -> Dict:
+    """
+    Build a vis.js-style prerequisite graph. Course set is deterministic (sorted codes).
+    When over limit_nodes, nodes are kept in order: completed, then unlocked, then locked;
+    within each group, codes in priority_course_codes (e.g. planner / recommendations) first.
+    """
     completed = get_completed_courses(student_id)
     prereq_cache = load_prerequisites_cache()
     if not prereq_cache:
         return {"nodes": [], "edges": []}
+
+    priority_course_codes = priority_course_codes or set()
+    priority_course_codes = {str(c).strip().upper() for c in priority_course_codes if c}
 
     all_codes: Set[str] = set()
     for course_code, prereqs in prereq_cache.items():
@@ -28,14 +39,15 @@ def build_prerequisite_graph(student_id: int, major: str = None, limit_nodes: in
             reachable.update(prereq_cache.get(code, []))
         all_codes &= reachable
 
-    all_codes = set(list(all_codes)[:limit_nodes * 2])
+    # Deterministic iteration order (no random set truncation)
+    sorted_codes = sorted(c for c in all_codes if c)
 
     nodes: List[Dict] = []
     seen_nodes: Set[str] = set()
     edges: List[Dict] = []
 
-    for course_code in all_codes:
-        if not course_code or course_code in seen_nodes:
+    for course_code in sorted_codes:
+        if course_code in seen_nodes:
             continue
         seen_nodes.add(course_code)
         info = get_course_by_code(course_code) or {}
@@ -63,12 +75,39 @@ def build_prerequisite_graph(student_id: int, major: str = None, limit_nodes: in
             if prereq in seen_nodes and prereq != course_code:
                 edges.append({"from": prereq, "to": course_code})
 
-    def order_key(n):
+    def priority_key(n: Dict) -> tuple:
+        code = n["id"]
+        pri = 0 if code in priority_course_codes else 1
+        return (pri, code)
+
+    def order_key(n: Dict) -> tuple:
         s = n["status"]
-        return (0 if s == "completed" else 1 if s == "unlocked" else 2, n["id"])
+        tier = 0 if s == "completed" else 1 if s == "unlocked" else 2
+        return (tier, priority_key(n))
+
     nodes.sort(key=order_key)
+
     if len(nodes) > limit_nodes:
-        nodes = nodes[:limit_nodes]
+        completed_n = [n for n in nodes if n["status"] == "completed"]
+        unlocked_n = [n for n in nodes if n["status"] == "unlocked"]
+        locked_n = [n for n in nodes if n["status"] == "locked"]
+
+        def sort_bucket(bucket: List[Dict]) -> List[Dict]:
+            return sorted(bucket, key=priority_key)
+
+        completed_n = sort_bucket(completed_n)
+        unlocked_n = sort_bucket(unlocked_n)
+        locked_n = sort_bucket(locked_n)
+
+        out: List[Dict] = []
+        for bucket in (completed_n, unlocked_n, locked_n):
+            for n in bucket:
+                if len(out) >= limit_nodes:
+                    break
+                out.append(n)
+            if len(out) >= limit_nodes:
+                break
+        nodes = out
         node_ids = {n["id"] for n in nodes}
         edges = [e for e in edges if e["from"] in node_ids and e["to"] in node_ids]
 

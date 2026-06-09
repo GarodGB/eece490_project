@@ -1,0 +1,14 @@
+services:
+  academicpath:
+    build: .
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./instance:/app/instance
+    environment:
+      - FLASK_ENV=production
+      - FLASK_USE_RELOADER=0
+      - PORT=5005
+      - SECRET_KEY=academicpath-docker-demo-key
+      # Optional: uncomment/set this if you want external LLM fallback in the AI Advisor.
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}

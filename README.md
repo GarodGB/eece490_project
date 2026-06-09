@@ -1,231 +1,211 @@
-# Smart Academic Planning System
+# AcademicPath — Option A ML Academic Planning System
 
-A comprehensive AI-powered web application for semester-wise course selection and workload optimization.
+AcademicPath is an **application-oriented machine learning system** for semester planning. It helps CCE/ECE/CSE students enter completed courses, set a target GPA, and receive a personalized semester plan that balances degree progress, GPA protection, prerequisite readiness, workload, and predicted course performance.
 
-## Features
+> Important scope note: this is a rigorous **ML-assisted prototype** trained on synthetic student outcomes and real catalogue/planning structure. It should not be presented as a validated AUB advising system trained on real AUB student records.
 
-- **AI-Powered Course Difficulty Prediction** - Predicts course difficulty based on student profile
-- **Semester Workload Estimation** - Estimates overall semester difficulty and overload risk
-- **Smart Course Recommendations** - Personalized recommendations based on academic strategy
-- **Prerequisite Tracking** - Automatic course unlocking based on completed prerequisites
-- **Prerequisite Graph** - Interactive DAG of courses (completed / unlocked / locked)
-- **What-If GPA** - See what GPA you need this semester to hit a target; simulate grades
-- **Export & Share** - Export semester plan as PDF or CSV
-- **Dark Mode** - Toggle with preference saved in localStorage
-- **Course Ratings** - Rate completed courses (1–5 difficulty); see aggregate next to predictions
-- **Semester Planner** - Plan and analyze semester course loads
-- **AI Academic Advisor** - Chatbot for academic guidance
-- **Bottleneck Analysis** - Identify critical courses that unlock many others
-- **Admin Panel** - Dashboard, course list/edit, stats, majors (admin users only)
-- **Modern Responsive UI** - Bootstrap 5 with beautiful, mobile-friendly design
+---
 
-## Tech Stack
+## Why this fits Option A
 
-- **Backend**: Flask (Python)
-- **Database**: SQLite by default (`instance/smart_academic.db`); optional MySQL via environment variables
-- **ML Models**: XGBoost, Random Forest, Gradient Boosting, Neural Networks
-- **Frontend**: Bootstrap 5, jQuery
-- **AI Chatbot**: OpenAI GPT (optional)
+This project is not only a notebook model. It is a running web application with:
 
-## Setup Instructions
+- a real student-facing workflow: register/login → completed courses → GPA goal → recommendations;
+- explicit academic rules for eligibility: completed courses, prerequisites, program requirements, failed-course repair, credit limits;
+- ML models for prediction/ranking: difficulty, workload, risk, success probability, expected grade;
+- baseline-vs-ML evidence saved in reports;
+- error/limitation discussion and responsible ML notes;
+- Flask API/UI and Docker support.
 
-### 1. Install Dependencies
+### Real-world problem
+Students often choose next-semester courses using informal advice, incomplete prerequisite knowledge, or a rough idea of what is “easy.” This can lead to overload, delayed graduation, GPA damage, or taking courses in a poor sequence.
 
-```bash
-pip install -r requirements.txt
+### Decision supported
+The system supports the decision:
+
+> Which valid courses should this student take next semester, given their completed courses, strengths/weaknesses, target GPA, workload tolerance, and degree progress?
+
+### Why non-AI alone is insufficient
+A pure rule system can say whether a course is allowed, but it cannot personalize course fit using prior performance patterns, subject strengths, expected grade, workload pressure, and academic risk. AcademicPath therefore uses rules for **eligibility** and ML for **personalized ranking**.
+
+---
+
+## ML design
+
+The final system uses five supervised models trained from the generated student-course history.
+
+| Model | Task | Output used by recommender |
+|---|---|---|
+| Model 1 | Personalized course difficulty regression | Expected difficulty score/category |
+| Model 2 | Semester workload regression | Predicted semester difficulty + overload risk |
+| Model 3 | Future academic risk classification | Low/medium/high/critical academic risk |
+| Model 4 | Course success classification | Probability of earning C+ or above |
+| Model 5 | Expected grade regression | Expected AUB grade points out of 4.3 |
+
+### Key ML features
+
+The models use pre-attempt features only, including:
+
+- prior GPA and recent average;
+- prerequisite performance and completion ratio;
+- subject/area strength and weakness indicators;
+- course level, credits, lab/project status;
+- prerequisite count/depth and course centrality;
+- term load and workload tolerance;
+- major/support/elective role;
+- course topic profile inferred from title/description/catalogue tags.
+
+The recommender then combines ML outputs with academic constraints to create a valid plan. Rules filter invalid candidates; ML scores and ranks valid candidates.
+
+---
+
+## AUB-style GPA handling
+
+- `A+` is supported as **4.3** quality points for individual course grades.
+- Cumulative GPA and simulated GPA are capped at **4.0**.
+- Target GPA feasibility warnings are shown when the requested GPA cannot realistically be reached in one semester.
+
+---
+
+## Run locally on Windows PowerShell
+
+Open the project folder:
+
+```text
+EECE 490 - Smart Academic Planning
 ```
 
-### 2. Configure database (optional)
+Then run the commands one by one:
 
-**Default — SQLite:** do nothing. The app creates `instance/smart_academic.db` when you run `scripts/setup_database.py` or when tables are initialized.
-
-**Optional — MySQL:** set environment variables before running (do not commit real passwords):
-
-```bash
-export USE_MYSQL=1
-export DB_HOST=127.0.0.1
-export DB_PORT=3306
-export DB_USER=your_user
-export DB_PASSWORD=your_password
-export DB_NAME=your_database
+```powershell
+python -m venv .venv
 ```
 
-**Production:** set `SECRET_KEY` and `OPENAI_API_KEY` (optional) via environment variables; turn off `DEBUG` in `config.py` for real deployment.
-
-### 3. Initialize Database
-
-First, make sure your cleaned data files exist:
-- `Data/merged_courses.csv`
-- `Data/prerequisites.csv`
-
-Then run:
-```bash
-python scripts/setup_database.py
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt --timeout 300 --prefer-binary
 ```
 
-This will:
-- Drop all existing tables
-- Create fresh database schema
-- Load all courses and prerequisites
-
-### 4. Train ML Models (Optional)
-
-Retrain all models used by the app (1–3):
-```bash
-python ml/train_all_models.py
+```powershell
+.\.venv\Scripts\python.exe scripts\setup_database.py
 ```
 
-Or train individually after generating synthetic data (`python scripts/generate_synthetic_data.py`):
-```bash
-python ml/model1_course_difficulty.py
-python ml/model2_semester_workload.py
-python ml/model3_academic_risk.py
+```powershell
+.\.venv\Scripts\python.exe ml\train_all_models.py --regenerate
 ```
 
-### 5. Run the Application
-
-```bash
-python app.py
+```powershell
+.\.venv\Scripts\python.exe app.py
 ```
 
-The URL and port come from **`config.py`** (default **`http://localhost:5005`**).
+Open the URL shown in the terminal, usually:
 
-## Project Structure
-
-```
-├── app.py                      # Main Flask application
-├── config.py                   # Configuration settings
-├── database/
-│   ├── models.py               # SQLAlchemy models
-│   └── db.py                   # Database connection
-├── services/
-│   ├── prerequisite_service.py  # Prerequisite logic
-│   ├── ml_service.py          # ML model predictions
-│   ├── recommendation_engine.py # Course recommendations
-│   └── advisor.py             # AI advisor/chatbot
-├── ml/
-│   ├── train_all_models.py    # Train models 1–3
-│   ├── model1_course_difficulty.py
-│   ├── model2_semester_workload.py
-│   ├── model3_academic_risk.py
-│   └── models/                # Trained .pkl files (created by training)
-├── scripts/
-│   ├── setup_database.py       # init DB + load CSVs (uses load_data_to_db_fast)
-│   ├── load_data_to_db_fast.py
-│   ├── generate_synthetic_data.py
-│   ├── create_course_csvs.py   # optional: refresh static/data course indexes
-│   ├── extract_majors.py
-│   ├── seed_admin.py
-│   └── set_admin.py
-├── templates/
-│   ├── base.html
-│   ├── index.html
-│   └── dashboard.html
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       ├── main.js
-│       └── dashboard.js
-└── Data/
-    ├── merged_courses.csv
-    └── prerequisites.csv
+```text
+http://127.0.0.1:5005
 ```
 
-## API Endpoints
+### Daily use after first setup
 
-### Authentication
-- `POST /api/register` - Register new student
-- `POST /api/login` - Login student
-- `POST /api/logout` - Logout
+After the first setup, you usually only need:
 
-### Student Profile
-- `GET /api/student/profile` - Get profile
-- `PUT /api/student/profile` - Update profile
+```powershell
+.\.venv\Scripts\python.exe app.py
+```
 
-### Courses
-- `GET /api/courses/completed` - Get completed courses
-- `POST /api/courses/completed` - Add completed course
-- `GET /api/courses/unlocked` - Get unlocked courses
-- `GET /api/courses/locked` - Get locked courses
-- `GET /api/courses/search?q=query` - Search courses
-- `GET /api/courses/<id>/difficulty` - Get difficulty prediction
+Retrain only if you changed data, feature engineering, or ML code.
 
-### Recommendations
-- `GET /api/recommendations?credits=15` - Get course recommendations
+---
 
-### Semester Planning
-- `POST /api/semester/optimize` - Analyze semester plan
 
-### Advisor
-- `POST /api/advisor/chat` - Chat with AI advisor
-- `GET /api/advisor/bottlenecks` - Get bottleneck courses
+## AI Advisor
 
-## Usage
+The AI Advisor is grounded in the student's saved profile. It can answer questions about:
 
-1. **Register/Login**: Create an account or login
-2. **Add Completed Courses**: Add courses you've already taken with grades
-3. **View Recommendations**: Get AI-powered course recommendations
-4. **Plan Semester**: Select courses and analyze semester difficulty
-5. **Chat with Advisor**: Ask questions about your academic plan
-6. **Check Bottlenecks**: Identify critical courses to prioritize
+- current GPA and completed credits;
+- failed/weak courses and retake logic;
+- strengths and weaknesses by course area;
+- target-GPA feasibility;
+- recommended courses and why they were selected;
+- prerequisite status and course difficulty.
 
-## ML Models
+By default, the advisor uses deterministic project logic and the same ML/recommendation engine as the dashboard. If `OPENAI_API_KEY` is set, it can use an LLM fallback, but the prompt is grounded in the student's actual app data and instructed not to invent policies or course facts.
 
-### Model 1: Course Difficulty Prediction
-- **Algorithms**: Random Forest, XGBoost
-- **Performance**: R² = 0.71, RMSE = 0.12
-- **Purpose**: Predict individual course difficulty for a student
+## Docker run
 
-### Model 2: Semester Workload Estimation
-- **Algorithms**: Gradient Boosting, Neural Network
-- **Performance**: R² = 0.92, RMSE = 0.06
-- **Purpose**: Estimate overall semester difficulty and overload risk
+```powershell
+docker compose up --build
+```
 
-### Model 3 (API / dashboard)
-- **Model 3**: Academic risk — `GET /api/student/academic-risk`  
-See **`Documentaion And help/ML_MODELS.md`** for how each model maps to code paths.
+The app runs inside a container and exposes the Flask web app. Local database files are mounted through the `instance/` volume.
 
-## Admin
+---
 
-- **Create default admin** (run once after DB is set up):  
-  `python scripts/seed_admin.py`  
-  Creates user **admin** / **admin@gmail.com** / **admin123** with admin rights. Log in with username `admin` and password `admin123` to see the Admin link and access `/admin`.
-- **Set another user as admin**:  
-  `python scripts/set_admin.py <username>`
+## Important files
 
-<<<<<<< HEAD
-## Git / coursework commits
+| File/folder | Purpose |
+|---|---|
+| `app.py` | Flask routes and API endpoints |
+| `templates/` | UI pages |
+| `static/` | CSS/JS assets |
+| `database/` | SQLAlchemy models and DB connection |
+| `Data/` | course catalogue, prerequisites, synthetic data |
+| `scripts/setup_database.py` | initializes the database |
+| `scripts/generate_synthetic_data.py` | builds synthetic training data |
+| `ml/train_all_models.py` | trains all five ML models |
+| `ml/model1_course_difficulty.py` | course difficulty model |
+| `ml/model2_semester_workload.py` | semester workload model |
+| `ml/model3_academic_risk.py` | future academic risk model |
+| `ml/model4_course_success_probability.py` | course success model |
+| `ml/model5_expected_grade.py` | expected grade model |
+| `services/recommendation_engine.py` | final course ranking/recommendation logic |
+| `services/ml_service.py` | runtime ML prediction helpers |
+| `reports/` | ML metrics and quality reports |
+| `docs/` | explanation, ML design, and final notes |
 
-For a **3-week-style project timeline**, commit **several times per week** (small, logical changes)—not everything in one push. See **`PROJECT_GUIDE.md` → Section 2** for a day-by-day example plan.
+---
 
-**Guided commit messages (course workflow):** **`Documentaion And help/GIT_COMMIT_PLAN.md`** (copy-paste blocks). Optional: add your own `git_project_commit.sh` that reads `scripts/git_commit_plan.pipe`.
-=======
+## Reports to cite in the project discussion
 
->>>>>>> origin/main
+- `reports/final_ml_rigor_upgrade.json`
+- `reports/ml_quality_gate.json`
+- `reports/ml_strength_weakness_quality_gate.json`
+- `docs/FINAL_ML_RIGOR_UPGRADE.md`
+- `docs/STEP_FINAL_LOGICAL_RECOMMENDER_FIX.md`
+- `docs/OPTION_A_FINAL_README.md`
 
-## Notes
+---
 
-- The system uses synthetic student data for ML training
-- Real student data is only used for predictions, not model retraining
-- OpenAI API key is optional (chatbot works with rule-based fallback)
-- After clone, run **`python ml/train_all_models.py`** to create **`ml/models/*.pkl`** (otherwise the app uses safe fallbacks for predictions)
-- PDF export requires `reportlab` (included in requirements.txt)
+## Limitations and responsible ML
 
-## Troubleshooting
+1. **Synthetic outcomes:** real AUB student grades were not available. The system validates ML logic on synthetic student-course histories.
+2. **Not an official advisor:** recommendations should support, not replace, human advising.
+3. **Bias/fairness:** synthetic data assumptions can shape outputs; this is documented and should be discussed.
+4. **Privacy:** student data is stored locally in SQLite for the prototype. A production version would require stronger authentication, encryption, and access controls.
+5. **Robustness:** unusual student histories may produce uncertain recommendations; the UI flags unrealistic GPA targets and high-risk plans.
 
-**Database connection issues**
-- **SQLite:** delete `instance/smart_academic.db` and run `python scripts/setup_database.py` again.
-- **MySQL:** confirm `USE_MYSQL=1` and all `DB_*` env vars match your server; test with `mysql` CLI.
+---
 
-**Model Loading Issues:**
-- Ensure model files exist in `ml/models/`
-- Run training scripts if models are missing
+## Final positioning
 
-**Import Errors:**
-- Install all requirements: `pip install -r requirements.txt`
-- Check Python version (3.8+)
+AcademicPath should be presented as:
 
-## License
+> A production-style, ML-assisted academic planning prototype that combines deterministic degree rules with personalized machine learning predictions to recommend feasible, GPA-aware semester plans.
 
-This project is for academic purposes.
+Do **not** present it as:
+
+> A fully validated AUB production system trained on real student outcomes.
+
+## Optional OpenAI Advisor
+
+The core ML system runs locally. The AI Advisor can optionally use OpenAI as a natural-language explanation layer.
+
+Create a private `.env` file in the project root:
+
+```env
+OPENAI_API_KEY=your_real_key_here
+OPENAI_MODEL=gpt-4o-mini
+ADVISOR_USE_OPENAI=true
+```
+
+Do not commit `.env` to GitHub. The project includes `.env.example` only.
+
+The advisor is grounded: it receives only the student's saved academic record, target GPA, failed/weak courses, strengths/weaknesses, prerequisite/course status, and the current ML recommendation output. If the API key is missing or fails, the app automatically falls back to the local grounded advisor.

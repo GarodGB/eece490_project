@@ -1,62 +1,1751 @@
 {% extends "base.html" %}
 
-{% block title %}Admin - Smart Academic Planning{% endblock %}
+{% block title %}Dashboard - Smart Academic Planning{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-gear me-2"></i> Admin Dashboard</h2>
-    <a href="/" class="btn btn-outline-primary"><i class="bi bi-house me-1"></i> Home</a>
+
+<div class="row g-3 g-md-4 mb-5">
+    <div class="col-12">
+        <div class="card dashboard-card fade-in">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i> Student Profile</h5>
+                    <div class="d-flex gap-2">
+                        <a href="/profile" class="btn btn-sm btn-light">
+                            <i class="bi bi-person-circle me-1"></i> Full Profile
+                        </a>
+                        <button class="btn btn-sm btn-light" onclick="showProfileModal()">
+                            <i class="bi bi-gear me-1"></i> Quick Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 g-md-4" id="profileInfo">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card pulse" style="background: var(--gradient-primary);">
+                            <h3 id="gpaDisplay">0.00</h3>
+                            <p>GPA</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card" style="background: var(--gradient-pink);">
+                            <h3 id="semesterDisplay">1</h3>
+                            <p>Current Semester</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card" style="background: var(--gradient-blue);">
+                            <h3 id="coursesDisplay">0</h3>
+                            <p>Courses Completed</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card" style="background: var(--gradient-green);">
+                            <h3 id="majorDisplay">-</h3>
+                            <p>Major</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card dashboard-card">
-            <div class="card-body">
-                <h5 class="card-title text-muted">Total Students</h5>
-                <h3 id="adminStatStudents">-</h3>
+
+<div class="mb-4">
+    <ul class="nav nav-tabs flex-nowrap overflow-auto" id="mainTabs" role="tablist" style="scrollbar-width: thin; -ms-overflow-style: auto;">
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#performance">
+            <i class="bi bi-graph-up me-1"></i> <span class="d-none d-md-inline">Performance</span><span class="d-md-none">Stats</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#recommendations">
+            <i class="bi bi-lightbulb me-1"></i> <span class="d-none d-md-inline">Recommendations</span><span class="d-md-none">Recs</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#courses">
+            <i class="bi bi-book me-1"></i> <span class="d-none d-md-inline">My Courses</span><span class="d-md-none">Courses</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#planner">
+            <i class="bi bi-calendar-check me-1"></i> <span class="d-none d-md-inline">Semester Planner</span><span class="d-md-none">Planner</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#advisor">
+            <i class="bi bi-chat-dots me-1"></i> <span class="d-none d-md-inline">AI Advisor</span><span class="d-md-none">Advisor</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bottlenecks">
+            <i class="bi bi-exclamation-triangle me-1"></i> <span class="d-none d-md-inline">Bottlenecks</span><span class="d-md-none">Bottlenecks</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link d-none" data-bs-toggle="tab" data-bs-target="#prereqGraph">
+            <i class="bi bi-diagram-3 me-1"></i> <span class="d-none d-md-inline">Prereq Graph</span><span class="d-md-none">Graph</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#calendar">
+            <i class="bi bi-calendar3 me-1"></i> <span class="d-none d-md-inline">Calendar</span><span class="d-md-none">Calendar</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#financial">
+            <i class="bi bi-cash-coin me-1"></i> <span class="d-none d-md-inline">Financial</span><span class="d-md-none">Financial</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#studyTime">
+            <i class="bi bi-clock me-1"></i> <span class="d-none d-md-inline">Study Time</span><span class="d-md-none">Study</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#assignments">
+            <i class="bi bi-list-check me-1"></i> <span class="d-none d-md-inline">Assignments</span><span class="d-md-none">Tasks</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#goals">
+            <i class="bi bi-bullseye me-1"></i> <span class="d-none d-md-inline">Goals</span><span class="d-md-none">Goals</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#wishlist">
+            <i class="bi bi-bookmark-heart me-1"></i> <span class="d-none d-md-inline">Wishlist</span><span class="d-md-none">Wishlist</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#notes">
+            <i class="bi bi-journal-text me-1"></i> <span class="d-none d-md-inline">Notes</span><span class="d-md-none">Notes</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#resources">
+            <i class="bi bi-link-45deg me-1"></i> <span class="d-none d-md-inline">Resources</span><span class="d-md-none">Resources</span>
+        </button>
+    </li>
+    <li class="nav-item flex-shrink-0">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#aiInsights">
+            <i class="bi bi-robot me-1"></i> <span class="d-none d-md-inline">AI Insights</span><span class="d-md-none">AI</span>
+        </button>
+    </li>
+</ul>
+</div>
+
+<div class="tab-content">
+
+    <div class="tab-pane fade show active" id="performance">
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-3">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-body text-center">
+                        <h2 class="mb-0" id="performanceGPA">0.00</h2>
+                        <p class="text-muted mb-0">Current GPA</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-3">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-body text-center">
+                        <h2 class="mb-0" id="performanceCourses">0</h2>
+                        <p class="text-muted mb-0">Courses Completed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-3">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-body text-center">
+                        <h2 class="mb-0" id="performanceCredits">0</h2>
+                        <p class="text-muted mb-0">Total Credits</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-3">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-body text-center">
+                        <h2 class="mb-0" id="performanceProgress">0%</h2>
+                        <p class="text-muted mb-0">Degree Progress</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-8">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i> GPA Trend</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="gpaTrendChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-bullseye me-2"></i> Goals Progress</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="goalsProgressContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-book me-2"></i> Course Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="coursePerformanceChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-clock me-2"></i> Study Time Analytics</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="studyTimeChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i> Assignment Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="assignmentStatsContainer"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i> Study Time by Course</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="studyByCourseChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-table me-2"></i> Recent Course Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Grade</th>
+                                        <th>Grade Points</th>
+                                        <th>Predicted Difficulty</th>
+                                        <th>Credits</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="coursePerformanceTable">
+                                    <tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card dashboard-card">
+
+
+    <div class="tab-pane fade" id="recommendations">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i> Course Recommendations & Planner</h5>
+            </div>
             <div class="card-body">
-                <h5 class="card-title text-muted">Total Courses</h5>
-                <h3 id="adminStatCourses">-</h3>
+                <div class="alert alert-light border mb-3 rec-goals-panel shadow-sm">
+                    <h6 class="mb-2 text-body"><i class="bi bi-bullseye text-primary"></i> Plan inputs</h6>
+                    <p class="small text-secondary mb-3 mb-md-2">Recommendations use your <strong class="text-body">completed work</strong>, <strong class="text-body">prerequisite graph</strong>, <strong class="text-body">GPA</strong>, optional <strong class="text-body">target GPA</strong>, and <strong class="text-body">semester intensity</strong>. <strong class="text-body">Core major</strong> courses are modeled as <strong class="text-body">more demanding</strong> than gen-ed electives at a similar level; STEM support sits between. Adjust intensity and mix below, then click <em>Save goals &amp; get recommendations</em>.</p>
+                    <div class="alert alert-light border small mb-0 py-2 px-3">
+                        <strong class="text-body">How picks are ordered</strong>
+                        <span class="text-secondary d-block">Only <strong class="text-body">unlocked</strong> courses are eligible. <strong class="text-body">Intensity</strong> re-ranks the pool (easy vs hard). <strong class="text-body">Major-focused</strong> mix deprioritizes electives; <strong class="text-body">More electives</strong> does the opposite. Gen-ed credits per term are <strong class="text-body">capped</strong> (see summary after you run).</span>
+                    </div>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small mb-1">Current GPA</label>
+                            <div class="border rounded px-2 py-2 bg-white small" id="recCurrentGpaDisplay">—</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small mb-1" for="recTargetGpaInput">Target GPA (next semester)</label>
+                            <input type="number" class="form-control" id="recTargetGpaInput" min="0" max="4" step="0.1" placeholder="e.g. 3.5 (optional)">
+                            <small class="text-muted">Optional; leave blank to weight mostly by intensity below.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small mb-1" for="recWorkloadRange">Semester intensity (tolerance)</label>
+                            <input type="range" class="form-range" id="recWorkloadRange" min="0" max="1" step="0.1" value="0.5">
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>Light / balanced</span>
+                                <span>Level <strong id="recWorkloadValue">0.5</strong></span>
+                                <span>Heavy / challenging</span>
+                            </div>
+                            <small class="text-muted d-block mt-1">Low intensity allows <strong>zero</strong> courses labeled Hard; higher intensity allows more Hard-tier picks.</small>
+                        </div>
+                    </div>
+                    <div class="row g-3 align-items-end mt-1">
+                        <div class="col-md-6 ms-md-auto">
+                            <label class="form-label small mb-1" for="recMaxHardCourses"><i class="bi bi-speedometer2 text-primary"></i> Hard-course limit (difficulty tier)</label>
+                            <select class="form-select shadow-sm" id="recMaxHardCourses" title="How many recommended courses may be labeled Hard">
+                                <option value="">Auto — follow intensity above</option>
+                                <option value="0">0 — Easy and Medium only (no Hard)</option>
+                                <option value="1">At most 1 Hard</option>
+                                <option value="2">At most 2 Hard</option>
+                                <option value="3">At most 3 Hard</option>
+                                <option value="4">At most 4 Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="bi bi-calendar3"></i> Semester Term</label>
+                        <select class="form-select" id="termSelect">
+                            <option value="Fall">Fall</option>
+                            <option value="Spring">Spring</option>
+                            <option value="Summer">Summer</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="bi bi-credit-card"></i> Target Credits</label>
+                        <input type="number" class="form-control" id="targetCredits" value="15" min="12" max="24">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="bi bi-list-ol"></i> Max Courses</label>
+                        <input type="number" class="form-control" id="maxCourses" value="6" min="3" max="10">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="loadRecommendations()">
+                            <i class="bi bi-arrow-clockwise"></i> Save goals &amp; get recommendations
+                        </button>
+                    </div>
+                </div>
+                <div class="rec-elective-panel mb-3">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label class="form-label small mb-1 fw-semibold text-body" for="recElectiveEmphasis"><i class="bi bi-bookmark-star text-primary"></i> Electives &amp; gen-ed mix</label>
+                            <select class="form-select shadow-sm" id="recElectiveEmphasis" title="How strongly to blend major courses with electives">
+                                <option value="major_first">Major-focused (mostly major &amp; required support)</option>
+                                <option value="balanced" selected>Balanced (major + support + some electives)</option>
+                                <option value="include_electives">More electives (lighter / gen-ed friendly)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check rec-elective-check px-3 py-3 h-100 d-flex align-items-start">
+                                <input class="form-check-input mt-1 flex-shrink-0" type="checkbox" id="recIncludeElectives" checked>
+                                <label class="form-check-label small ms-2 mb-0 text-secondary" for="recIncludeElectives">
+                                    <span class="text-body fw-semibold d-block mb-1">Include gen-ed &amp; electives</span>
+                                    When checked, unlocked <strong>general-education and elective</strong> courses can be recommended. Uncheck for <strong>major and support</strong> courses only.
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rec-role-legend mb-3" role="note" aria-label="Course role legend">
+                    <span class="text-muted small me-1">Legend:</span>
+                    <span class="role-badge role-badge--major"><i class="bi bi-mortarboard-fill" aria-hidden="true"></i> Major</span>
+                    <span class="role-badge role-badge--support"><i class="bi bi-calculator" aria-hidden="true"></i> Support</span>
+                    <span class="role-badge role-badge--elective"><i class="bi bi-stars" aria-hidden="true"></i> Elective</span>
+                </div>
+
+                <div id="plannerTableContainer" class="mb-3" style="display: none;">
+                    <h6 class="mb-2 fw-semibold"><i class="bi bi-table text-primary"></i> Recommended semester plan</h6>
+                    <div class="table-responsive rounded-3 border border-light shadow-sm">
+                        <table class="table table-sm table-hover align-middle mb-0 rec-planner-table">
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Name</th>
+                                    <th>Credits</th>
+                                    <th>Difficulty</th>
+                                    <th>Level</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody id="plannerTableBody">
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light border-top">
+                                    <th>Total</th>
+                                    <th colspan="4" id="plannerTotalCredits">0 credits</th>
+                                    <th id="plannerTotalCourses">0 courses</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <div class="mt-2 d-flex flex-wrap gap-2">
+                            <button class="btn btn-sm btn-outline-success" onclick="exportPlanCSV()" title="Export plan as CSV"><i class="bi bi-file-earmark-spreadsheet"></i> Export CSV</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="exportPlanPDF()" title="Export plan as PDF"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="recommendationsList"></div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card dashboard-card">
+
+
+    <div class="tab-pane fade" id="courses">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i> Completed Courses</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary mb-3" onclick="showAddCourseModal()">
+                            <i class="bi bi-plus-circle"></i> Add Course
+                        </button>
+                        <div id="completedCoursesList"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-unlock me-2"></i> Unlocked Courses</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="unlockedCoursesList"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i> Available This Semester</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-sm btn-outline-primary mb-2" onclick="loadAvailableCourses()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                        <div id="availableCoursesList" style="max-height: 600px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-4 mt-1">
+            <div class="col-12">
+                <div class="card dashboard-card border-primary slide-up">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h5 class="mb-0"><i class="bi bi-calendar2-range me-2"></i> Academic journey by semester</h5>
+                        <button type="button" class="btn btn-sm btn-light" onclick="loadAcademicJourneySection()" title="Reload timeline">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-3">Each course is grouped by the <strong>semester number</strong> you entered when adding it (1 = first semester in the app, 2 = second, …). Edit a course to fix the semester if needed.</p>
+                        <div id="academicJourneySection"><div class="text-center py-2 text-muted small">Loading…</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="planner">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i> Semester Planner</h5>
+            </div>
             <div class="card-body">
-                <h5 class="card-title text-muted">Course Ratings</h5>
-                <h3 id="adminStatRatings">-</h3>
-                <small class="text-muted">Avg difficulty (1-5): <span id="adminStatAvgRating">-</span></small>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                        <label class="form-label mb-0"><i class="bi bi-search"></i> Search Courses</label>
+                        <button class="btn btn-primary btn-sm" onclick="addRecommendedCourses()" title="Add recommended courses to planner">
+                            <i class="bi bi-lightbulb-fill"></i> Use Recommended Courses
+                        </button>
+                    </div>
+                    <input type="text" class="form-control" id="courseSearch" placeholder="Type course code or name to search...">
+                    <div id="plannerSearchResults" class="mt-2"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-list-check"></i> Selected Courses</h6>
+                        <div id="selectedCourses" class="border p-3 rounded planner-selected-area">
+                            <p class="text-muted">No courses selected. Search and click courses above to add them, or use recommended courses.</p>
+                        </div>
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn btn-success" onclick="analyzeSemester()">
+                                <i class="bi bi-graph-up"></i> Analyze Semester
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="clearPlanner()" title="Clear all selected courses">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </button>
+                        </div>
+                        <div class="card mt-4">
+                            <div class="card-header py-2"><h6 class="mb-0"><i class="bi bi-calculator"></i> What-If GPA</h6></div>
+                            <div class="card-body py-3">
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-3">
+                                        <label class="form-label small">Target overall GPA</label>
+                                        <input type="number" class="form-control form-control-sm" id="whatIfTargetGpa" min="0" max="4" step="0.1" value="3.0" placeholder="3.0">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-sm btn-primary" onclick="runWhatIfGpa()">What GPA do I need this semester?</button>
+                                    </div>
+                                </div>
+                                <div id="whatIfGpaResult" class="mt-2 small text-muted"></div>
+                                <hr class="my-2">
+                                <p class="small mb-1">Simulate grades: set grades for selected courses below and see resulting GPA.</p>
+                                <div id="simulateGradesContainer" class="small"></div>
+                                <button class="btn btn-sm btn-outline-secondary mt-1" onclick="runGpaSimulate()" id="btnSimulateGpa">Simulate GPA</button>
+                                <span id="simulateGpaResult" class="ms-2"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-bar-chart"></i> Semester Analysis</h6>
+                        <div id="semesterAnalysis">
+                            <p class="text-muted">Select courses and click "Analyze Semester" to see predictions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="advisor">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i> AI Academic Advisor</h5>
+                <p class="text-muted small mb-0 mt-2">Answers use your <strong>real</strong> profile: completed courses (with semesters), GPA, recommendations engine, bottlenecks, and planner. Ask about prerequisites, next courses, or your timeline.</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle"></i> <strong>Your AI Advisor can help with:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li><strong>Recommendation summary:</strong> “Why were these courses recommended?”, “Which option is safest for my GPA?”</li>
+                        <li><strong>GPA feasibility:</strong> “Can I reach my target GPA?”, “Is my target realistic this semester?”</li>
+                        <li><strong>Course reasoning:</strong> “Is EECE210 unlocked?”, “How difficult is MATH201 for me?”</li>
+                        <li><strong>Strengths & weaknesses:</strong> “What are my weak areas?”, “Which course areas fit me best?”</li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted"><strong>Try asking:</strong></small>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="$('#chatInput').val('Can I reach my target GPA?'); sendChatMessage();">Target GPA</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="$('#chatInput').val('Why were these courses recommended?'); sendChatMessage();">Explain Plan</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="$('#chatInput').val('What are my weak and strong areas?'); sendChatMessage();">Strengths</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="$('#chatInput').val('Which failed courses should I repair?'); sendChatMessage();">Repair Courses</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="$('#chatInput').val('Is EECE210 unlocked and how difficult is it?'); sendChatMessage();">Course Check</button>
+                    </div>
+                </div>
+                <div class="chat-container" id="chatContainer">
+                    <div class="chat-message bot">
+                        <strong>Advisor:</strong> Hello! I summarize your saved academic record and the ML recommendation outputs. Ask me about your target GPA, recommended courses, weak areas, failed courses, or a specific course code.
+                    </div>
+                </div>
+                <div class="input-group mt-3">
+                    <input type="text" class="form-control" id="chatInput" placeholder="Ask about GPA feasibility, recommendations, weak areas, or a course code...">
+                    <button class="btn btn-primary" onclick="sendChatMessage()">
+                        <i class="bi bi-send"></i> Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="bottlenecks">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0"><i class="bi bi-diagram-3-fill me-2"></i> Available & Bottleneck Courses</h5>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadBottlenecks()" title="Reload from your latest completed courses">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle-fill me-2"></i> <strong>Smart Course Discovery</strong>
+                    <p class="mb-0 mt-2">Based on your completed courses, we show you which courses you can take now and which high-impact courses you should prioritize. Complete prerequisites to unlock more options!</p>
+                </div>
+                <div id="bottlenecksList"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade d-none" id="prereqGraph">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0"><i class="bi bi-diagram-3 me-2"></i> Prerequisite Graph</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success">Completed</span>
+                    <span class="badge bg-primary">Unlocked</span>
+                    <span class="badge bg-secondary">Locked</span>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadPrereqGraph()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-light border small mb-3">
+                    <strong>What this graph shows:</strong> prerequisite relationships and whether each course is <span class="badge bg-success">completed</span>, <span class="badge bg-primary">unlocked</span> (prereqs met), or <span class="badge bg-secondary">locked</span>. It does <strong>not</strong> use your GPA, target GPA, or recommendation sliders—those only affect the <em>Recommendations</em> tab. If you have courses on your plan or loaded recommendations, we prioritize those codes when the graph has to limit how many nodes are shown.
+                </div>
+                <p class="text-muted mb-3">Nodes are courses; edges point from prerequisite to course. Drag to pan, scroll to zoom.</p>
+                <div id="prereqGraphContainer" class="prereq-graph-area"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="calendar">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0"><i class="bi bi-calendar3 me-2"></i> Academic Calendar</h5>
+                <button class="btn btn-primary btn-sm" onclick="showAddCalendarEventModal()">
+                    <i class="bi bi-plus-circle"></i> Add Event
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">View Mode</label>
+                        <select class="form-select" id="calendarViewMode" onchange="loadCalendarEvents()">
+                            <option value="month">Month View</option>
+                            <option value="week">Week View</option>
+                            <option value="list">List View</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Filter by Type</label>
+                        <select class="form-select" id="calendarFilterType" onchange="loadCalendarEvents()">
+                            <option value="">All Types</option>
+                            <option value="registration">Registration</option>
+                            <option value="exam">Exams</option>
+                            <option value="break">Breaks</option>
+                            <option value="deadline">Deadlines</option>
+                            <option value="holiday">Holidays</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn btn-outline-primary w-100" onclick="loadCalendarEvents()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div id="calendarContainer"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="financial">
+        <div class="row g-3 g-md-4 mb-4">
+            <div class="col-md-3">
+                <div class="card dashboard-card slide-up" style="border-top: 4px solid var(--success);">
+                    <div class="card-body text-center">
+                        <div class="mb-2">
+                            <i class="bi bi-arrow-down-circle-fill text-success" style="font-size: 2rem;"></i>
+                        </div>
+                        <h6 class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.1em;">Total Income</h6>
+                        <h3 class="text-success mb-0" id="financialTotalIncome" style="font-weight: 800;">$0.00</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card slide-up" style="border-top: 4px solid var(--danger);">
+                    <div class="card-body text-center">
+                        <div class="mb-2">
+                            <i class="bi bi-arrow-up-circle-fill text-danger" style="font-size: 2rem;"></i>
+                        </div>
+                        <h6 class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.1em;">Total Expenses</h6>
+                        <h3 class="text-danger mb-0" id="financialTotalExpenses" style="font-weight: 800;">$0.00</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card slide-up" style="border-top: 4px solid var(--primary);">
+                    <div class="card-body text-center">
+                        <div class="mb-2">
+                            <i class="bi bi-cash-stack text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <h6 class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.1em;">Net Balance</h6>
+                        <h3 class="mb-0" id="financialNetBalance" style="font-weight: 800;">$0.00</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card slide-up" style="border-top: 4px solid var(--warning);">
+                    <div class="card-body text-center">
+                        <div class="mb-2">
+                            <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 2rem;"></i>
+                        </div>
+                        <h6 class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.1em;">Unpaid Expenses</h6>
+                        <h3 class="text-warning mb-0" id="financialUnpaid" style="font-weight: 800;">$0.00</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-3" id="financialTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#financialRecords">
+                    <i class="bi bi-receipt"></i> Records
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tuitionCalculator">
+                    <i class="bi bi-calculator"></i> Tuition Calculator
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#scholarships">
+                    <i class="bi bi-trophy"></i> Scholarships
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#budgetPlanning">
+                    <i class="bi bi-piggy-bank"></i> Budget Planning
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+            <div class="tab-pane fade show active" id="financialRecords">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-receipt me-2"></i> Financial Records</h5>
+                        <button class="btn btn-primary btn-sm" onclick="showAddFinancialRecordModal()">
+                            <i class="bi bi-plus-circle"></i> Add Record
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Filter by Semester</label>
+                            <select class="form-select" id="financialSemesterFilter" onchange="loadFinancialRecords()">
+                                <option value="">All Semesters</option>
+                            </select>
+                        </div>
+                        <div id="financialRecordsList"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="tab-pane fade" id="tuitionCalculator">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-calculator me-2"></i> Tuition Calculator</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="tuitionCalculatorForm">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Semester</label>
+                                    <input type="text" class="form-control" id="tuitionSemester" placeholder="Fall 2024" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Number of Credits</label>
+                                    <input type="number" class="form-control" id="tuitionCredits" min="1" max="24" value="15" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Cost per Credit ($)</label>
+                                    <input type="number" class="form-control" id="tuitionCostPerCredit" min="0" step="0.01" value="500" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Fees ($)</label>
+                                    <input type="number" class="form-control" id="tuitionFees" min="0" step="0.01" value="500" required>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="tuitionSaveRecord">
+                                        <label class="form-check-label" for="tuitionSaveRecord">
+                                            Save as financial record
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary w-100" onclick="calculateTuition()">
+                                        <i class="bi bi-calculator"></i> Calculate
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="tuitionCalculatorResult" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="tab-pane fade" id="scholarships">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-trophy me-2"></i> Scholarships</h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-info btn-sm" onclick="checkScholarshipEligibility()">
+                                <i class="bi bi-check-circle"></i> Check Eligibility
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="showAddScholarshipModal()">
+                                <i class="bi bi-plus-circle"></i> Add Scholarship
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="scholarshipsList"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="tab-pane fade" id="budgetPlanning">
+                <div class="card dashboard-card slide-up">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-piggy-bank me-2"></i> Budget Planning</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6>Income Breakdown</h6>
+                                <div id="incomeBreakdown"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Expense Breakdown</h6>
+                                <div id="expenseBreakdown"></div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> <strong>Budget Planning Tips:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Track all income sources (scholarships, grants, part-time work)</li>
+                                <li>Plan for tuition, fees, books, housing, and living expenses</li>
+                                <li>Set aside emergency funds (10-15% of income)</li>
+                                <li>Review and adjust your budget each semester</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="studyTime">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock me-2"></i> Study Time Tracking</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <button class="btn btn-primary" onclick="showAddStudySessionModal()">
+                            <i class="bi bi-plus-circle"></i> Log Study Session
+                        </button>
+                        <button class="btn btn-outline-primary ms-2" onclick="showAddStudyGoalModal()">
+                            <i class="bi bi-bullseye"></i> Set Study Goal
+                        </button>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-info" onclick="loadStudyAnalytics()">
+                            <i class="bi bi-graph-up"></i> View Analytics
+                        </button>
+                    </div>
+                </div>
+                <div id="studySessionsList"></div>
+                <div id="studyGoalsList" class="mt-4"></div>
+                <div id="studyAnalytics" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="assignments">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-check me-2"></i> Assignments & Tasks</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="showAddAssignmentModal()">
+                        <i class="bi bi-plus-circle"></i> Add Assignment
+                    </button>
+                    <div class="btn-group ms-2" role="group">
+                        <button type="button" class="btn btn-outline-secondary" onclick="loadAssignments('all')">All</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="loadAssignments('pending')">Pending</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="loadAssignments('completed')">Completed</button>
+                    </div>
+                </div>
+                <div id="assignmentsList"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="goals">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bullseye me-2"></i> Academic Goals</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="showAddGoalModal()">
+                        <i class="bi bi-plus-circle"></i> Set New Goal
+                    </button>
+                    <div class="btn-group ms-2" role="group">
+                        <button type="button" class="btn btn-outline-secondary" onclick="loadAcademicGoals('all')">All</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="loadAcademicGoals('active')">Active</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="loadAcademicGoals('completed')">Completed</button>
+                    </div>
+                </div>
+                <div id="academicGoalsList"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="wishlist">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bookmark-heart me-2"></i> Course Wishlist</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="showAddWishlistModal()">
+                        <i class="bi bi-plus-circle"></i> Add Course to Wishlist
+                    </button>
+                </div>
+                <div id="wishlistList"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="notes">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i> Study Notes</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="showAddNoteModal()">
+                        <i class="bi bi-plus-circle"></i> Create Note
+                    </button>
+                    <select class="form-select d-inline-block ms-2" style="width: auto;" id="notesCourseFilter" onchange="loadStudyNotes()">
+                        <option value="">All Courses</option>
+                    </select>
+                </div>
+                <div id="studyNotesList"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="resources">
+        <div class="card dashboard-card slide-up">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-link-45deg me-2"></i> Learning Resources</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="showAddResourceModal()">
+                        <i class="bi bi-plus-circle"></i> Add Resource
+                    </button>
+                    <select class="form-select d-inline-block ms-2" style="width: auto;" id="resourcesCourseFilter" onchange="loadLearningResources()">
+                        <option value="">All Courses</option>
+                    </select>
+                    <select class="form-select d-inline-block ms-2" style="width: auto;" id="resourcesTypeFilter" onchange="loadLearningResources()">
+                        <option value="">All Types</option>
+                        <option value="link">Links</option>
+                        <option value="video">Videos</option>
+                        <option value="tutorial">Tutorials</option>
+                        <option value="document">Documents</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div id="learningResourcesList"></div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card dashboard-card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-book me-1"></i> Most Taken Courses</h5>
+
+
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profileModalLabel">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="card-body">
-                <div id="adminMostTaken" class="list-group list-group-flush">Loading...</div>
+            <div class="modal-body">
+                <form id="profileForm">
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-mortarboard"></i> Major/Department</label>
+                        <select class="form-select" id="majorSelect" required>
+                            <option value="">Loading...</option>
+                        </select>
+                        <small class="text-muted">Your academic major or department</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-calendar3"></i> Current Semester</label>
+                        <input type="number" class="form-control" id="currentSemesterInput" min="1" max="20" value="1" required>
+                        <small class="text-muted">Which semester are you currently in? (e.g., 1 = First semester, 2 = Second semester)</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-graph-up"></i> Academic Strategy</label>
+                        <select class="form-select" id="strategySelect" required>
+                            <option value="easy">Easy - Prefer easier courses</option>
+                            <option value="balanced">Balanced - Mix of difficulty</option>
+                            <option value="fast">Fast - Complete requirements quickly</option>
+                        </select>
+                        <small class="text-muted">Your preferred course selection strategy</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-speedometer2"></i> Workload tolerance (next semester)</label>
+                        <input type="range" class="form-range" id="workloadRange" min="0" max="1" step="0.1" value="0.5">
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Light term (0.0)</small>
+                            <small class="text-muted">Current: <span id="workloadValue">0.5</span></small>
+                            <small class="text-muted">Challenging term (1.0)</small>
+                        </div>
+                        <small class="text-muted d-block mt-1">How intense a schedule you want; combined with GPA goals in the recommendation engine.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-bullseye"></i> Target GPA (next semester)</label>
+                        <input type="number" class="form-control" id="targetSemesterGpaInput" min="0" max="4" step="0.1" placeholder="e.g. 3.5 (optional)">
+                        <small class="text-muted">If above your current GPA, the planner favors safer, easier mixes; you can also set this on the Recommendations tab.</small>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> Changes to your major will update course recommendations.
+                        Changing your semester helps track your academic progress.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card dashboard-card">
+</div>
+
+
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCourseModalLabel">Add Completed Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label"><i class="bi bi-search"></i> Search Course (or browse all courses below)</label>
+                    <input type="text" class="form-control" id="courseSearchInput" placeholder="Type to search, or scroll to see all courses..." autocomplete="off">
+                    <small class="text-muted">Browse by type, or type at least 2 characters to search the catalog.</small>
+                </div>
+                <div class="mb-3" id="addCourseCatalogFilterWrap">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <span class="text-muted small text-nowrap"><i class="bi bi-funnel"></i> Show</span>
+                        <div class="btn-group btn-group-sm flex-wrap" role="group" aria-label="Course category">
+                            <input type="radio" class="btn-check" name="addCourseCatalogFilter" id="acfAll" value="all" checked autocomplete="off">
+                            <label class="btn btn-outline-dark" for="acfAll">All <span class="badge rounded-pill text-bg-light border ms-1" id="acfCountAll">0</span></label>
+                            <input type="radio" class="btn-check" name="addCourseCatalogFilter" id="acfMajor" value="major" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="acfMajor">Major <span class="badge rounded-pill text-bg-primary ms-1" id="acfCountMajor">0</span></label>
+                            <input type="radio" class="btn-check" name="addCourseCatalogFilter" id="acfElective" value="elective" autocomplete="off">
+                            <label class="btn btn-outline-success" for="acfElective">Elective <span class="badge rounded-pill text-bg-success ms-1" id="acfCountElective">0</span></label>
+                            <input type="radio" class="btn-check" name="addCourseCatalogFilter" id="acfSupport" value="support" autocomplete="off">
+                            <label class="btn btn-outline-secondary" for="acfSupport" title="Math, science, and prerequisites for your program">Supporting <span class="badge rounded-pill text-bg-secondary ms-1" id="acfCountSupport">0</span></label>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block"><strong>Major</strong> = your program. <strong>Elective</strong> = gen ed &amp; non-major options. <strong>Supporting</strong> = math/science and other prereqs.</small>
+                </div>
+                <div id="courseSearchResults" class="mt-2"></div>
+                <form id="addCourseForm" style="display: none;" class="mt-4 border-top pt-3">
+                    <input type="hidden" id="selectedCourseCode">
+                    <h6><i class="bi bi-info-circle"></i> Course Details</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Grade Received</label>
+                        <select class="form-select" id="courseGrade" required>
+                            <option value="A+">A+ (4.3; GPA capped at 4.0)</option>
+                            <option value="A">A (4.0)</option>
+                            <option value="A-">A- (3.7)</option>
+                            <option value="B+">B+ (3.3)</option>
+                            <option value="B">B (3.0)</option>
+                            <option value="B-">B- (2.7)</option>
+                            <option value="C+">C+ (2.3)</option>
+                            <option value="C">C (2.0)</option>
+                            <option value="C-">C- (1.7)</option>
+                            <option value="D+">D+ (1.3)</option>
+                            <option value="D">D (1.0)</option>
+                            <option value="F">F (0.0)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Semester Taken</label>
+                        <input type="number" class="form-control" id="semesterTaken" value="1" min="1" max="20" required>
+                        <small class="text-muted">Academic term index in <em>your</em> plan (1 = first term you record, 2 = second, …). This groups courses in <strong>Academic journey</strong> and AI insights—use your school’s term order consistently.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addCourse()" id="addCourseBtn" style="display: none;">Add Course</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-labelledby="editCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCourseModalLabel">Edit Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editCourseId">
+                <div class="mb-3">
+                    <label class="form-label">Course</label>
+                    <div class="form-control-plaintext">
+                        <strong id="editCourseCode"></strong> - <span id="editCourseName"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Grade Received</label>
+                    <select class="form-select" id="editCourseGrade" required>
+                        <option value="A+">A+ (4.3; GPA capped at 4.0)</option>
+                        <option value="A">A (4.0)</option>
+                        <option value="A-">A- (3.7)</option>
+                        <option value="B+">B+ (3.3)</option>
+                        <option value="B">B (3.0)</option>
+                        <option value="B-">B- (2.7)</option>
+                        <option value="C+">C+ (2.3)</option>
+                        <option value="C">C (2.0)</option>
+                        <option value="C-">C- (1.7)</option>
+                        <option value="D+">D+ (1.3)</option>
+                        <option value="D">D (1.0)</option>
+                        <option value="F">F (0.0)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Semester Taken</label>
+                    <input type="number" class="form-control" id="editCourseSemester" min="1" max="20" required>
+                    <small class="text-muted">Which semester did you take this course?</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveCourseEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="calendarEventModal" tabindex="-1" aria-labelledby="calendarEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="calendarEventModalLabel">Add Calendar Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="calendarEventId">
+                <div class="mb-3">
+                    <label class="form-label">Event Title *</label>
+                    <input type="text" class="form-control" id="calendarEventTitle" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" id="calendarEventDescription" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Event Type *</label>
+                    <select class="form-select" id="calendarEventType" required>
+                        <option value="registration">Registration</option>
+                        <option value="exam">Exam</option>
+                        <option value="break">Break</option>
+                        <option value="deadline">Deadline</option>
+                        <option value="holiday">Holiday</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Start Date *</label>
+                        <input type="datetime-local" class="form-control" id="calendarEventStartDate" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">End Date</label>
+                        <input type="datetime-local" class="form-control" id="calendarEventEndDate">
+                    </div>
+                </div>
+                <div class="mb-3 mt-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="calendarEventAllDay" checked>
+                        <label class="form-check-label" for="calendarEventAllDay">
+                            All Day Event
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Color</label>
+                    <input type="color" class="form-control form-control-color" id="calendarEventColor" value="#3b82f6">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Reminder (days before)</label>
+                    <input type="number" class="form-control" id="calendarEventReminder" min="0" value="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveCalendarEvent()">Save Event</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="financialRecordModal" tabindex="-1" aria-labelledby="financialRecordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="financialRecordModalLabel">Add Financial Record</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="financialRecordId">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Record Type *</label>
+                        <select class="form-select" id="financialRecordType" required>
+                            <option value="tuition">Tuition</option>
+                            <option value="course_fee">Course Fee</option>
+                            <option value="scholarship">Scholarship</option>
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Category *</label>
+                        <select class="form-select" id="financialRecordCategory" required>
+                            <option value="tuition">Tuition</option>
+                            <option value="fees">Fees</option>
+                            <option value="books">Books</option>
+                            <option value="housing">Housing</option>
+                            <option value="food">Food</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Title *</label>
+                        <input type="text" class="form-control" id="financialRecordTitle" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="financialRecordDescription" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Amount ($) *</label>
+                        <input type="number" class="form-control" id="financialRecordAmount" step="0.01" required>
+                        <small class="text-muted">Use negative for expenses, positive for income</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Semester</label>
+                        <input type="text" class="form-control" id="financialRecordSemester" placeholder="Fall 2024">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Due Date</label>
+                        <input type="datetime-local" class="form-control" id="financialRecordDueDate">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="financialRecordIsPaid">
+                            <label class="form-check-label" for="financialRecordIsPaid">
+                                Already Paid
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveFinancialRecord()">Save Record</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="scholarshipModal" tabindex="-1" aria-labelledby="scholarshipModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scholarshipModalLabel">Add Scholarship</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="scholarshipId">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label">Scholarship Name *</label>
+                        <input type="text" class="form-control" id="scholarshipName" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="scholarshipDescription" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Amount ($) *</label>
+                        <input type="number" class="form-control" id="scholarshipAmount" step="0.01" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Application Deadline</label>
+                        <input type="datetime-local" class="form-control" id="scholarshipDeadline">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Min GPA Required</label>
+                        <input type="number" class="form-control" id="scholarshipGpaMin" min="0" max="4" step="0.01">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Min Credits Required</label>
+                        <input type="number" class="form-control" id="scholarshipCreditsMin" min="0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Required Major</label>
+                        <input type="text" class="form-control" id="scholarshipMajor" placeholder="Leave empty for any">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="scholarshipRenewal">
+                            <label class="form-check-label" for="scholarshipRenewal">
+                                Renewal Required
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Renewal Min GPA</label>
+                        <input type="number" class="form-control" id="scholarshipRenewalGpa" min="0" max="4" step="0.01">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="scholarshipApplied">
+                            <label class="form-check-label" for="scholarshipApplied">
+                                Applied
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="scholarshipAwarded">
+                            <label class="form-check-label" for="scholarshipAwarded">
+                                Awarded
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveScholarship()">Save Scholarship</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="studySessionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studySessionModalTitle">Log Study Session</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="studySessionId">
+                <div class="mb-3">
+                    <label class="form-label">Course *</label>
+                    <select class="form-select" id="studySessionCourse" required></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Date *</label>
+                    <input type="datetime-local" class="form-control" id="studySessionDate" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Duration (minutes) *</label>
+                    <input type="number" class="form-control" id="studySessionDuration" min="1" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" id="studySessionNotes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveStudySession()">Save Session</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="studyGoalModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studyGoalModalTitle">Set Study Goal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="studyGoalId">
+                <div class="mb-3">
+                    <label class="form-label">Course</label>
+                    <select class="form-select" id="studyGoalCourse">
+                        <option value="">All Courses</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Goal Type *</label>
+                    <select class="form-select" id="studyGoalType" required>
+                        <option value="weekly">Weekly Hours</option>
+                        <option value="total">Total Hours</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Target Hours per Week</label>
+                    <input type="number" class="form-control" id="studyGoalHoursPerWeek" min="0" step="0.5" value="0">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Target Total Hours</label>
+                    <input type="number" class="form-control" id="studyGoalHoursTotal" min="0" step="0.5" value="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveStudyGoal()">Save Goal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="assignmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignmentModalTitle">Add Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="assignmentId">
+                <div class="mb-3">
+                    <label class="form-label">Course *</label>
+                    <select class="form-select" id="assignmentCourse" required></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Title *</label>
+                    <input type="text" class="form-control" id="assignmentTitle" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" id="assignmentDescription" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Type *</label>
+                    <select class="form-select" id="assignmentType" required>
+                        <option value="assignment">Assignment</option>
+                        <option value="project">Project</option>
+                        <option value="exam">Exam</option>
+                        <option value="quiz">Quiz</option>
+                        <option value="lab">Lab</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Due Date *</label>
+                    <input type="datetime-local" class="form-control" id="assignmentDueDate" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" id="assignmentPriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Estimated Hours</label>
+                        <input type="number" class="form-control" id="assignmentEstimatedHours" min="0" step="0.5">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAssignment()">Save Assignment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="goalModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="goalModalTitle">Set Academic Goal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="goalId">
+                <div class="mb-3">
+                    <label class="form-label">Goal Type *</label>
+                    <select class="form-select" id="goalType" required>
+                        <option value="gpa">GPA</option>
+                        <option value="credits">Credits</option>
+                        <option value="courses">Number of Courses</option>
+                        <option value="semester">Semester Goal</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Title *</label>
+                    <input type="text" class="form-control" id="goalTitle" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" id="goalDescription" rows="2"></textarea>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">Target Value *</label>
+                        <input type="number" class="form-control" id="goalTargetValue" step="0.01" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Current Value</label>
+                        <input type="number" class="form-control" id="goalCurrentValue" step="0.01" value="0">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Target Date</label>
+                    <input type="date" class="form-control" id="goalTargetDate">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Semester</label>
+                    <input type="text" class="form-control" id="goalSemester" placeholder="e.g., Fall 2024">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAcademicGoal()">Save Goal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="wishlistModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="wishlistModalTitle">Add to Wishlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="wishlistId">
+                <div class="mb-3">
+                    <label class="form-label">Course *</label>
+                    <select class="form-select" id="wishlistCourse" required></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Priority</label>
+                    <select class="form-select" id="wishlistPriority">
+                        <option value="1">Low</option>
+                        <option value="2">Medium</option>
+                        <option value="3" selected>High</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Target Semester</label>
+                    <input type="text" class="form-control" id="wishlistTargetSemester" placeholder="e.g., Fall 2024">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" id="wishlistNotes" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveWishlistItem()">Add to Wishlist</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="noteModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="noteModalTitle">Create Study Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="noteId">
+                <div class="mb-3">
+                    <label class="form-label">Course *</label>
+                    <select class="form-select" id="noteCourse" required></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Title *</label>
+                    <input type="text" class="form-control" id="noteTitle" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Content *</label>
+                    <textarea class="form-control" id="noteContent" rows="10" required></textarea>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">Topic</label>
+                        <input type="text" class="form-control" id="noteTopic" placeholder="e.g., Chapter 5, Midterm Review">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tags (comma-separated)</label>
+                        <input type="text" class="form-control" id="noteTags" placeholder="e.g., important, formulas, review">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveStudyNote()">Save Note</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="resourceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resourceModalTitle">Add Learning Resource</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="resourceId">
+                <div class="mb-3">
+                    <label class="form-label">Course *</label>
+                    <select class="form-select" id="resourceCourse" required></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Title *</label>
+                    <input type="text" class="form-control" id="resourceTitle" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Resource Type *</label>
+                    <select class="form-select" id="resourceType" required>
+                        <option value="link">Link</option>
+                        <option value="video">Video</option>
+                        <option value="tutorial">Tutorial</option>
+                        <option value="document">Document</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">URL *</label>
+                    <input type="url" class="form-control" id="resourceUrl" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" id="resourceDescription" rows="3"></textarea>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">Topic</label>
+                        <input type="text" class="form-control" id="resourceTopic">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tags (comma-separated)</label>
+                        <input type="text" class="form-control" id="resourceTags">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveLearningResource()">Save Resource</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="tab-pane fade" id="aiInsights">
+        <div class="card dashboard-card slide-up">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-link-45deg me-1"></i> Quick Links</h5>
+                <h5 class="mb-0"><i class="bi bi-robot me-2"></i> AI Insights & Predictions</h5>
             </div>
             <div class="card-body">
-                <a href="/admin/courses" class="btn btn-primary mb-2 w-100 text-start">
-                    <i class="bi bi-list-ul me-2"></i> Manage Courses (list & edit)
-                </a>
-                <p class="text-muted small mb-0">View and edit course names, credits, and basic info. Majors are stored in Data/majors.json.</p>
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle"></i> <strong>AI-Powered Predictions:</strong> Get insights about your academic performance, graduation timeline, and course success probabilities.
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-lg-8 mx-auto">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i> Academic Risk Assessment</h6>
+                            </div>
+                            <div class="card-body" id="academicRiskCard">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="mt-2 text-muted">Loading risk assessment...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card border-secondary">
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0"><i class="bi bi-signpost-split me-2"></i> Path &amp; prerequisite insights</h6>
+                            </div>
+                            <div class="card-body" id="pathInsightsCard">
+                                <div class="text-center py-2 text-muted small">Open this tab to load insights</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="bi bi-calendar3-week me-2"></i> Semester-by-semester journey</h6>
+                            </div>
+                            <div class="card-body" id="semesterTimelineCard">
+                                <div class="text-center py-2 text-muted small">Loading timeline...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -64,34 +1753,677 @@
 {% endblock %}
 
 {% block extra_js %}
+
+<link rel="stylesheet" href="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.css">
+<script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+<style>
+    .ai-ml-card {
+        background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 45%, #ecfeff 100%);
+        border: 1px solid rgba(79, 70, 229, 0.18);
+        border-radius: 18px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .ai-ml-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 10px 25px rgba(79, 70, 229, 0.25);
+    }
+
+    .ai-model-pill {
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: white;
+        border-radius: 14px;
+        padding: 10px 12px;
+        height: 100%;
+    }
+
+    .ai-analysis-card {
+        border: 0;
+        border-radius: 18px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .ai-analysis-card .card-body {
+        padding: 18px;
+    }
+
+    .ai-big-number {
+        font-size: 1.85rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+
+    .ai-mini-label {
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .ai-reason-box {
+        max-width: 460px;
+        font-size: 0.82rem;
+        color: #475569;
+        line-height: 1.35;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 8px 10px;
+    }
+
+    .ai-fit-bar {
+        width: 90px;
+        height: 7px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .ai-fit-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #4f46e5, #06b6d4);
+    }
+
+    .ai-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: #eef2ff;
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+        white-space: nowrap;
+    }
+
+    .ai-chip-risk-low {
+        background: #ecfdf5;
+        color: #047857;
+        border-color: #a7f3d0;
+    }
+
+    .ai-chip-risk-medium {
+        background: #fffbeb;
+        color: #b45309;
+        border-color: #fde68a;
+    }
+
+    .ai-chip-risk-high,
+    .ai-chip-risk-critical {
+        background: #fef2f2;
+        color: #b91c1c;
+        border-color: #fecaca;
+    }
+
+    .rec-planner-table th,
+    .rec-planner-table td {
+        vertical-align: middle;
+    }
+
+    .rec-planner-table thead th {
+        white-space: nowrap;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #475569;
+        background: #f8fafc;
+    }
+</style>
+
 <script>
-$(document).ready(function() {
-    $.ajax({
-        url: '/api/admin/stats',
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        success: function(r) {
-            if (r.success) {
-                $('#adminStatStudents').text(r.total_students != null ? r.total_students : '-');
-                $('#adminStatCourses').text(r.total_courses != null ? r.total_courses : '-');
-                $('#adminStatRatings').text(r.total_ratings != null ? r.total_ratings : '-');
-                $('#adminStatAvgRating').text(r.average_difficulty_rating != null ? r.average_difficulty_rating : '-');
-                var list = r.most_taken_courses || [];
-                var html = '';
-                list.forEach(function(item) {
-                    html += '<div class="list-group-item d-flex justify-content-between"><span>' + (item.course_code || '') + '</span><span class="badge bg-primary">' + (item.count || 0) + ' taken</span></div>';
-                });
-                $('#adminMostTaken').html(html || '<p class="text-muted mb-0">No data</p>');
+(function () {
+    "use strict";
+
+    function safeText(value, fallback = "—") {
+        if (value === null || value === undefined || value === "") return fallback;
+        return String(value);
+    }
+
+    function escapeHtml(value) {
+        return safeText(value, "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function numberValue(value, fallback = 0) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : fallback;
+    }
+
+    function percent(value) {
+        return `${Math.round(numberValue(value, 0) * 100)}%`;
+    }
+
+    function difficultyBadge(category, score) {
+        const cat = safeText(category, "Medium");
+        const s = numberValue(score, 0);
+        let cls = "text-bg-warning";
+
+        if (cat.toLowerCase() === "easy") cls = "text-bg-success";
+        else if (cat.toLowerCase() === "hard") cls = "text-bg-danger";
+
+        return `
+            <span class="badge ${cls}">${escapeHtml(cat)}</span>
+            <span class="text-muted small ms-1">${percent(s)}</span>
+        `;
+    }
+
+    function roleBadge(course) {
+        const role = safeText(course.role_label || course.catalog_bucket, "Course");
+        const lower = role.toLowerCase();
+
+        if (lower.includes("major")) {
+            return `<span class="role-badge role-badge--major"><i class="bi bi-mortarboard-fill"></i> Major</span>`;
+        }
+
+        if (lower.includes("support")) {
+            return `<span class="role-badge role-badge--support"><i class="bi bi-calculator"></i> Support</span>`;
+        }
+
+        return `<span class="role-badge role-badge--elective"><i class="bi bi-stars"></i> Elective</span>`;
+    }
+
+    function riskChip(level) {
+        const risk = safeText(level, "Medium");
+        const cls = `ai-chip-risk-${risk.toLowerCase()}`;
+        return `<span class="ai-chip ${cls}"><i class="bi bi-shield-check"></i> ${escapeHtml(risk)}</span>`;
+    }
+
+    function categoryFromScore(score, kind) {
+        const x = numberValue(score, 0);
+
+        if (kind === "difficulty") {
+            if (x < 0.33) return "Easy";
+            if (x < 0.67) return "Moderate";
+            return "Challenging";
+        }
+
+        if (x < 0.30) return "Low";
+        if (x < 0.60) return "Medium";
+        if (x < 0.80) return "High";
+        return "Critical";
+    }
+
+    function ensureAiBoxesExist() {
+        const recommendationPane = document.querySelector("#recommendations .card-body");
+        if (!recommendationPane) return;
+
+        if (!document.getElementById("aiRecommendationEngineBox")) {
+            const legend = document.querySelector(".rec-role-legend");
+            const box = document.createElement("div");
+
+            box.id = "aiRecommendationEngineBox";
+            box.className = "ai-ml-card p-3 mb-3";
+            box.innerHTML = `
+                <div class="d-flex align-items-start gap-3">
+                    <div class="ai-ml-icon">
+                        <i class="bi bi-cpu-fill fs-4"></i>
+                    </div>
+                    <div class="w-100">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+                            <h6 class="mb-0 fw-bold text-body">
+                                AI / Machine Learning Recommendation Engine
+                            </h6>
+                            <span class="badge rounded-pill text-bg-primary">
+                                Rules filter · ML ranks
+                            </span>
+                        </div>
+
+                        <p class="small text-secondary mb-3">
+                            Academic rules only remove invalid choices such as completed courses and unmet prerequisites.
+                            The ranking is then driven by five ML outputs: predicted course difficulty, semester workload,
+                            future academic risk, course success probability, and expected grade points. A GPA feasibility
+                            check flags goals that are not realistic in the selected semester.
+                        </p>
+
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <div class="ai-model-pill">
+                                    <strong><i class="bi bi-bar-chart-line text-primary"></i> Model 1</strong>
+                                    <div class="text-muted small">Personalized course difficulty</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="ai-model-pill">
+                                    <strong><i class="bi bi-speedometer2 text-success"></i> Model 2</strong>
+                                    <div class="text-muted small">Semester workload / overload</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="ai-model-pill">
+                                    <strong><i class="bi bi-shield-check text-warning"></i> Model 3</strong>
+                                    <div class="text-muted small">Future academic risk</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="ai-model-pill">
+                                    <strong><i class="bi bi-check2-circle text-info"></i> Model 4</strong>
+                                    <div class="text-muted small">Course success probability</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="ai-model-pill">
+                                    <strong><i class="bi bi-award text-danger"></i> Model 5</strong>
+                                    <div class="text-muted small">Expected AUB grade points</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="aiEngineLiveSummary" class="small text-muted mt-3">
+                            Run recommendations to see live ML predictions.
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (legend) {
+                legend.parentNode.insertBefore(box, legend);
+            } else {
+                recommendationPane.prepend(box);
             }
-        },
-        error: function(xhr) {
-            if (xhr.status === 403) {
-                window.location.href = '/dashboard';
-                return;
+        }
+
+        if (!document.getElementById("aiSemesterAnalysisBox")) {
+            const plannerContainer = document.getElementById("plannerTableContainer");
+            const analysis = document.createElement("div");
+
+            analysis.id = "aiSemesterAnalysisBox";
+            analysis.className = "row g-3 mb-3";
+            analysis.style.display = "none";
+            analysis.innerHTML = `
+                <div class="col-md-4">
+                    <div class="card ai-analysis-card h-100">
+                        <div class="card-body">
+                            <div class="ai-mini-label">Predicted semester difficulty</div>
+                            <div class="ai-big-number" id="aiSemesterDifficulty">—</div>
+                            <span class="badge text-bg-info" id="aiSemesterDifficultyLabel">Waiting</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card ai-analysis-card h-100">
+                        <div class="card-body">
+                            <div class="ai-mini-label">Predicted overload risk</div>
+                            <div class="ai-big-number" id="aiOverloadRisk">—</div>
+                            <span class="badge text-bg-warning" id="aiOverloadRiskLabel">Waiting</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card ai-analysis-card h-100">
+                        <div class="card-body">
+                            <div class="ai-mini-label">Academic risk model</div>
+                            <div class="ai-big-number" id="aiAcademicRisk">—</div>
+                            <span class="badge text-bg-secondary" id="aiAcademicRiskModel">Model 3</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (plannerContainer) {
+                plannerContainer.parentNode.insertBefore(analysis, plannerContainer);
+            } else {
+                recommendationPane.appendChild(analysis);
             }
-            $('#adminMostTaken').html('<p class="text-danger">Failed to load stats.</p>');
+        }
+    }
+
+    function upgradeTableHeader() {
+        const table = document.querySelector(".rec-planner-table");
+        if (!table) return;
+
+        const theadRow = table.querySelector("thead tr");
+
+        if (theadRow && !theadRow.dataset.aiUpgraded) {
+            theadRow.innerHTML = `
+                <th>Course Code</th>
+                <th>Course Name</th>
+                <th>Credits</th>
+                <th>Difficulty</th>
+                <th>Level</th>
+                <th>Role</th>
+                <th>ML Fit</th>
+                <th>Risk</th>
+                <th>AI Reason</th>
+            `;
+            theadRow.dataset.aiUpgraded = "1";
+        }
+
+        const totalCreditsCell = document.getElementById("plannerTotalCredits");
+        if (totalCreditsCell) {
+            totalCreditsCell.setAttribute("colspan", "7");
+        }
+    }
+
+    function buildApiUrl() {
+        const credits = document.getElementById("targetCredits")?.value || "15";
+        const maxCourses = document.getElementById("maxCourses")?.value || "6";
+        const term = document.getElementById("termSelect")?.value || "Fall";
+        const tolerance = document.getElementById("recWorkloadRange")?.value || "0.5";
+        const targetGpa = document.getElementById("recTargetGpaInput")?.value || "";
+        const includeElectives = document.getElementById("recIncludeElectives")?.checked ? "1" : "0";
+        const electiveEmphasis = document.getElementById("recElectiveEmphasis")?.value || "balanced";
+        const maxHard = document.getElementById("recMaxHardCourses")?.value || "";
+
+        const params = new URLSearchParams();
+        params.set("credits", credits);
+        params.set("max_courses", maxCourses);
+        params.set("term", term);
+        params.set("tolerance", tolerance);
+        params.set("include_electives", includeElectives);
+        params.set("elective_emphasis", electiveEmphasis);
+        params.set("_", Date.now().toString());
+
+        if (targetGpa !== "") params.set("target_gpa", targetGpa);
+        if (maxHard !== "") params.set("max_hard", maxHard);
+
+        return `/api/recommendations?${params.toString()}`;
+    }
+
+    function renderAiSummary(data) {
+        const planning = data.planning_params || {};
+        const workload = data.semester_workload || {};
+        const academicRisk = data.academic_risk || {};
+
+        const semesterDifficulty = workload.semester_difficulty;
+        const overloadRisk = workload.overload_risk;
+
+        const semesterBox = document.getElementById("aiSemesterAnalysisBox");
+        if (semesterBox) semesterBox.style.display = "flex";
+
+        const difficultyText = semesterDifficulty === null || semesterDifficulty === undefined ? "—" : percent(semesterDifficulty);
+        const overloadText = overloadRisk === null || overloadRisk === undefined ? "—" : percent(overloadRisk);
+
+        const difficultyLabel = workload.difficulty_category || categoryFromScore(semesterDifficulty, "difficulty");
+        const overloadLabel = workload.risk_category || categoryFromScore(overloadRisk, "risk");
+
+        const riskLevel = academicRisk.risk_level || planning.academic_risk_level || "Medium";
+        const riskModel = academicRisk.model_used || planning.academic_risk_model || "Model 3";
+
+        const d1 = document.getElementById("aiSemesterDifficulty");
+        const d2 = document.getElementById("aiOverloadRisk");
+        const d3 = document.getElementById("aiAcademicRisk");
+
+        if (d1) d1.textContent = difficultyText;
+        if (d2) d2.textContent = overloadText;
+        if (d3) d3.textContent = riskLevel;
+
+        const l1 = document.getElementById("aiSemesterDifficultyLabel");
+        const l2 = document.getElementById("aiOverloadRiskLabel");
+        const l3 = document.getElementById("aiAcademicRiskModel");
+
+        if (l1) l1.textContent = difficultyLabel;
+        if (l2) l2.textContent = overloadLabel;
+        if (l3) l3.textContent = riskModel;
+
+        const live = document.getElementById("aiEngineLiveSummary");
+        if (live) {
+            const modelList = Array.isArray(planning.ml_models_used)
+                ? planning.ml_models_used.join(" • ")
+                : "Model 1 • Model 2 • Model 3";
+
+            live.innerHTML = `
+                <strong class="text-body">Live ML output:</strong>
+                semester difficulty <strong>${difficultyText}</strong>,
+                overload risk <strong>${overloadText}</strong>,
+                academic risk <strong>${escapeHtml(riskLevel)}</strong>.
+                <div class="mt-1">
+                    <span class="ai-chip">
+                        <i class="bi bi-cpu"></i>
+                        ${escapeHtml(planning.ranking_mode || "ml_centered_hybrid_recommender")}
+                    </span>
+                </div>
+                <div class="mt-1 text-muted">${escapeHtml(modelList)}</div>
+            `;
+        }
+
+        const recList = document.getElementById("recommendationsList");
+
+        if (recList) {
+            const creditWarning = planning.credit_warning
+                ? `<div class="alert alert-warning mt-3 mb-0 small">${escapeHtml(planning.credit_warning)}</div>`
+                : "";
+
+            const alternatives = Array.isArray(data.alternatives) && data.alternatives.length
+                ? `
+                    <div class="mt-4">
+                        <h6 class="text-uppercase text-muted small fw-bold">Also consider / alternatives</h6>
+                        <ul class="mb-0">
+                            ${data.alternatives.map(a => `
+                                <li>
+                                    <strong>${escapeHtml(a.course_code)}</strong> —
+                                    ${escapeHtml(a.name)}
+                                    <span class="text-muted">
+                                        (${numberValue(a.credit_hours, 0)} cr,
+                                        ${percent(a.difficulty_score)} diff,
+                                        ${percent(a.success_probability)} success,
+                                        ${escapeHtml(a.role_label || "course")}))})
+                                    </span>
+                                </li>
+                            `).join("")}
+                        </ul>
+                    </div>
+                `
+                : "";
+
+            const targetFlag = planning.target_feasibility_note
+                ? `<div class="alert ${planning.target_reachable_with_current_plan === false ? 'alert-warning' : 'alert-success'} border-0 shadow-sm mt-3 mb-0">
+                    <strong>Target semester GPA insight:</strong> ${escapeHtml(planning.target_feasibility_note)}
+                    ${planning.target_gap_after_plan != null && planning.target_reachable_with_current_plan === false ? `<div class="small mt-1">ML-predicted semester GPA is about ${escapeHtml(Number(planning.target_gap_after_plan).toFixed(2))} points below your selected semester goal.</div>` : ''}
+                  </div>`
+                : '';
+
+            const cumulativeFlag = '';
+
+            recList.innerHTML = `
+                ${targetFlag}
+                ${cumulativeFlag}
+                <div class="alert alert-light border shadow-sm mt-3">
+                    <h6 class="fw-bold mb-2">
+                        <i class="bi bi-robot text-primary"></i> AI interpretation
+                    </h6>
+                    <p class="small text-secondary mb-2">
+                        ${escapeHtml(planning.ai_engine_summary || "Rules validate eligible courses, then ML personalizes ranking using difficulty, workload, GPA, and risk.")}
+                    </p>
+                    <div class="small">
+                        <strong>Total scheduled:</strong> ${escapeHtml(planning.total_credits_scheduled ?? "—")} credits ·
+                        <strong>Goal mode:</strong> ${escapeHtml(planning.goal_mode || "—")} ·
+                        <strong>Elective cap:</strong> ${escapeHtml(planning.elective_credit_cap ?? "—")} credits ·
+                        <strong>Max hard courses:</strong> ${escapeHtml(planning.max_hard_courses ?? "—")}
+                    </div>
+                    ${creditWarning}
+                    ${alternatives}
+                </div>
+            `;
+        }
+    }
+
+    function renderPlannerTable(courses) {
+        const body = document.getElementById("plannerTableBody");
+        const container = document.getElementById("plannerTableContainer");
+
+        if (!body) return;
+
+        if (!courses.length) {
+            body.innerHTML = `
+                <tr>
+                    <td colspan="9" class="text-center text-muted py-4">
+                        No recommendations found. Try increasing credits, enabling electives, or lowering restrictions.
+                    </td>
+                </tr>
+            `;
+
+            if (container) container.style.display = "block";
+            return;
+        }
+
+        let totalCredits = 0;
+
+        body.innerHTML = courses.map(course => {
+            const credits = numberValue(course.credit_hours, 0);
+            totalCredits += credits;
+
+            const fit = course.ml_fit_score;
+            const fitPercent = fit === null || fit === undefined ? "—" : percent(fit);
+            const fitWidth = fit === null || fit === undefined ? 0 : Math.round(numberValue(fit, 0) * 100);
+            const success = course.success_probability ?? course.success_chance;
+            const successText = success === null || success === undefined ? "—" : percent(success);
+            const expectedGrade = course.expected_grade_points;
+            const expectedGradeText = expectedGrade === null || expectedGrade === undefined ? "—" : Number(expectedGrade).toFixed(2) + "/4.3";
+            const expectedGradeCategory = course.expected_grade_category || "";
+            const expectedDiffScore = course.expected_difficulty_score ?? course.difficulty_score;
+            const expectedDiffText = expectedDiffScore === null || expectedDiffScore === undefined ? "—" : percent(expectedDiffScore);
+            const risk = course.academic_risk_level || "Medium";
+            const reason = course.recommendation_reason || course.ai_reason ||
+                "ML ranked this course using predicted expected grade, difficulty, workload tolerance, and academic risk.";
+
+            return `
+                <tr>
+                    <td><strong>${escapeHtml(course.course_code)}</strong></td>
+
+                    <td>
+                        <div class="fw-semibold">${escapeHtml(course.name)}</div>
+                        <div class="small text-muted">${escapeHtml(course.subject || "")}</div>
+                    </td>
+
+                    <td>${credits}</td>
+
+                    <td>${difficultyBadge(course.difficulty_category, course.difficulty_score)}</td>
+
+                    <td>${escapeHtml(course.course_level || "—")}</td>
+
+                    <td>${roleBadge(course)}</td>
+
+                    <td>
+                        <div class="fw-bold">${fitPercent}</div>
+                        <div class="ai-fit-bar">
+                            <div class="ai-fit-fill" style="width:${fitWidth}%;"></div>
+                        </div>
+                        <div class="small text-muted">ML grade outlook: ${escapeHtml(expectedGradeCategory || "—")}</div>
+                        <div class="small text-muted">Success ${successText}</div>
+                        <div class="small text-muted">Expected difficulty ${expectedDiffText}</div>
+                        <div class="small text-muted">Rank ${escapeHtml(course.ml_rank_score ?? "—")}</div>
+                    </td>
+
+                    <td>${riskChip(risk)}</td>
+
+                    <td>
+                        <div class="ai-reason-box">
+                            <i class="bi bi-robot text-primary"></i>
+                            ${escapeHtml(reason)}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+
+        const totalCreditsEl = document.getElementById("plannerTotalCredits");
+        const totalCoursesEl = document.getElementById("plannerTotalCourses");
+
+        if (totalCreditsEl) totalCreditsEl.textContent = `${totalCredits.toFixed(1)} credits`;
+        if (totalCoursesEl) totalCoursesEl.textContent = `${courses.length} courses`;
+
+        if (container) container.style.display = "block";
+    }
+
+    async function loadRecommendationsAI() {
+        ensureAiBoxesExist();
+        upgradeTableHeader();
+
+        const button = document.querySelector('button[onclick="loadRecommendations()"]');
+        const oldButtonHtml = button ? button.innerHTML : "";
+
+        try {
+            if (button) {
+                button.disabled = true;
+                button.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Running ML models...`;
+            }
+
+            const url = buildApiUrl();
+
+            const response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            const recommendations = Array.isArray(data.recommendations)
+                ? data.recommendations
+                : [];
+
+            window.recommendedCourses = recommendations;
+            window.currentRecommendations = recommendations;
+            window.lastRecommendationResponse = data;
+            window.lastRecommendedPlan = recommendations;
+
+            renderPlannerTable(recommendations);
+            renderAiSummary(data);
+
+        } catch (error) {
+            console.error("Recommendation error:", error);
+
+            const recList = document.getElementById("recommendationsList");
+
+            if (recList) {
+                recList.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Could not load recommendations.</strong>
+                        <div class="small mt-1">${escapeHtml(error.message || error)}</div>
+                    </div>
+                `;
+            }
+        } finally {
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = oldButtonHtml || `<i class="bi bi-arrow-clockwise"></i> Save goals & get recommendations`;
+            }
+        }
+    }
+
+    window.loadRecommendations = loadRecommendationsAI;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        ensureAiBoxesExist();
+        upgradeTableHeader();
+
+        const workloadRange = document.getElementById("recWorkloadRange");
+        const workloadValue = document.getElementById("recWorkloadValue");
+
+        if (workloadRange && workloadValue) {
+            workloadRange.addEventListener("input", function () {
+                workloadValue.textContent = workloadRange.value;
+            });
         }
     });
-});
+})();
 </script>
+
 {% endblock %}

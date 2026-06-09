@@ -9,11 +9,31 @@ PREREQUISITES_FILE = DATA_DIR / 'prerequisites.csv'
 OUTPUT_DIR = Path(__file__).parent.parent / 'static' / 'data'
 OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
 
+def _inverse_prerequisite_counts():
+    """Count how many courses list each code as a direct prerequisite (fan-out / unlocks)."""
+    if not PREREQUISITES_FILE.exists():
+        return {}
+    pre_df = pd.read_csv(PREREQUISITES_FILE)
+    pre_df['course'] = pre_df['course'].astype(str).str.strip()
+    pre_df['prerequisite'] = pre_df['prerequisite'].astype(str).str.strip()
+    pre_df = pre_df[(pre_df['course'] != '') & (pre_df['prerequisite'] != '')].copy()
+    # Each row: `course` requires `prerequisite` — so prerequisite unlocks `course`
+    return pre_df.groupby('prerequisite').size().to_dict()
+
+
 def create_course_index():
     
     print("Creating course index CSV...")
     
     df = pd.read_csv(COURSES_FILE)
+    inverse = _inverse_prerequisite_counts()
+    if inverse:
+        def unlocks_for_row(code):
+            if pd.isna(code):
+                return 0
+            k = str(code).strip()
+            return int(inverse.get(k, 0))
+        df['unlocks_count'] = df['course_code'].apply(unlocks_for_row)
     
     course_index = df[['course_code', 'subject', 'number', 'name', 'credit_hours', 
                       'course_level', 'is_lab', 'prerequisite_count', 

@@ -57,6 +57,7 @@ class Student(Base):
     current_semester = Column(Integer, default=1)
     strategy = Column(String(20), default='balanced')
     workload_tolerance = Column(Float, default=0.5)
+    target_semester_gpa = Column(Float, nullable=True)
     gpa = Column(Float, default=0.0)
     is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
